@@ -1,0 +1,3637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terraform Quest — Master IaC Like a Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════
+   DESIGN SYSTEM — Retro-Futuristic Terminal
+════════════════════════════════════════════ */
+:root{
+  --bg:#040a12;
+  --bg2:#080f1a;
+  --bg3:#0d1929;
+  --panel:#0a1628;
+  --border:#1a3a5c;
+  --border2:#0d4a7a;
+  --text:#c8e6ff;
+  --text2:#7ab3d9;
+  --dim:#2a4a6a;
+  --neon:#00d4ff;
+  --neon2:#00ff9d;
+  --neon3:#ff6b35;
+  --neon4:#ffd700;
+  --neon5:#b742ff;
+  --neon6:#ff2d78;
+  --mono:'Fira Code',monospace;
+  --display:'Orbitron',monospace;
+  --body:'Space Grotesk',sans-serif;
+  --xp:0;
+}
+.light-mode {
+  --bg:#f8f9ff;
+  --bg2:#eef2ff;
+  --bg3:#e3e9ff;
+  --panel:rgba(255,255,255,0.65);
+  --border:rgba(120,160,255,0.45);
+  --border2:rgba(90,140,255,0.35);
+  --text:#0e1f3c;
+  --text2:#37639c;
+  --dim:#7a8cae;
+  --neon:#065ac7;
+  --neon2:#0b8aff;
+  --neon3:#f56d3a;
+  --neon4:#4f8bff;
+  --neon5:#8749ff;
+  --neon6:#d5318f;
+}
+.light-mode code,
+.light-mode .cmd-code,
+.light-mode .code-body,
+.light-mode .cmt,
+.light-mode .kw,
+.light-mode .val,
+.light-mode .str,
+.light-mode .fn,
+.light-mode .tag,
+.light-mode .code-lab,
+.light-mode .code-lab-header,
+.light-mode .code-dot,
+.light-mode .code-lab-title,
+.light-mode .btn,
+.light-mode .search-input,
+.light-mode .cmd-card,
+.light-mode .cheat-card-body,
+.light-mode pre {
+  color:#111 !important;
+  background:rgba(255,255,255,0.95) !important;
+  border:1px solid rgba(0,0,0,0.08) !important;
+}
+.light-mode code,
+.light-mode .cmd-code,
+.light-mode .code-body,
+.light-mode .cmt,
+.light-mode .kw,
+.light-mode .val,
+.light-mode .str,
+.light-mode .fn,
+.light-mode .tag {
+  color:#111 !important;
+  background:rgba(255,255,255,0.92) !important;
+  border:1px solid rgba(0,0,0,0.1) !important;
+}
+.light-mode pre,
+.light-mode .code-lab,
+.light-mode .cheat-card-body {
+  background:rgba(255,255,255,0.92) !important;
+  color:#111 !important;
+  border:1px solid rgba(100,120,170,0.22) !important;
+}
+.light-mode .hud,
+.light-mode .search-modal,
+.light-mode .section-card,
+.light-mode .quiz-card,
+.light-mode footer,
+.light-mode .match-card {
+  background: rgba(255,255,255,0.65) !important;
+  border: 1px solid rgba(255,255,255,0.35) !important;
+  backdrop-filter: blur(8px) saturate(150%);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+.light-mode .hud { border-bottom-color: rgba(120,160,255,0.3); }
+.light-mode .search-trigger{background:rgba(255,255,255,0.45);border-color:rgba(120,160,255,0.35);}
+.light-mode .kbd{background:rgba(255,255,255,0.9);border-color:rgba(120,160,255,0.3);color:#1a2f5c;}
+*{margin:0;padding:0;box-sizing:border-box}
+html, body{width:100%;min-width:0;scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  font-size:15px;
+  line-height:1.6;
+  overflow-x:hidden;
+  cursor:auto;
+}
+body, input, button, textarea, select { cursor:auto; }
+/* Custom cursor */
+.cursor{
+  width:16px;height:16px;
+  border:2px solid var(--neon);
+  border-radius:50%;
+  position:fixed;
+  pointer-events:none;
+  z-index:9999;
+  transition:transform 0.1s;
+  mix-blend-mode:screen;
+}
+.cursor-dot{
+  width:4px;height:4px;
+  background:var(--neon);
+  border-radius:50%;
+  position:fixed;
+  pointer-events:none;
+  z-index:9999;
+}
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--neon);border-radius:2px}
+
+/* Scanlines effect */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
+  pointer-events:none;
+  z-index:1;
+}
+.light-mode body::after{
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.08) 3px,rgba(255,255,255,0.08) 6px);
+}
+
+/* ════ HEADER / HUD ════ */
+.hud{
+  position:fixed;top:0;left:0;right:0;
+  z-index:100;
+  background:rgba(4,10,18,0.92);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border2);
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:0.6rem 1.5rem;
+  gap:1rem;
+}
+.hud-logo{
+  font-family:var(--display);
+  font-size:1rem;
+  font-weight:900;
+  color:var(--neon);
+  text-shadow:0 0 20px var(--neon);
+  letter-spacing:0.1em;
+  white-space:nowrap;
+}
+.hud-xp{
+  display:flex;align-items:center;gap:0.75rem;
+  flex:1;max-width:400px;
+}
+.xp-label{
+  font-family:var(--display);
+  font-size:0.6rem;
+  color:var(--neon4);
+  letter-spacing:0.1em;
+  white-space:nowrap;
+}
+.xp-bar-wrap{
+  flex:1;height:8px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:4px;
+  overflow:hidden;
+}
+.xp-bar{
+  height:100%;
+  background:linear-gradient(90deg,var(--neon4),var(--neon3));
+  border-radius:4px;
+  transition:width 0.8s cubic-bezier(0.34,1.56,0.64,1);
+  width:0%;
+  box-shadow:0 0 10px var(--neon4);
+}
+.xp-num{
+  font-family:var(--display);
+  font-size:0.7rem;
+  color:var(--neon4);
+  white-space:nowrap;
+}
+.hud-stats{
+  display:flex;gap:1rem;align-items:center;
+}
+.hud-stat{
+  text-align:center;
+}
+.hud-stat-n{
+  font-family:var(--display);
+  font-size:0.85rem;
+  font-weight:900;
+  color:var(--neon2);
+}
+.hud-stat-l{
+  font-size:0.55rem;
+  color:var(--text2);
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+}
+.nav-pills{
+  display:flex;gap:0.3rem;flex-wrap:wrap;
+}
+.nav-pill{
+  font-family:var(--display);
+  font-size:0.55rem;
+  color:var(--text2);
+  padding:0.25rem 0.5rem;
+  border:1px solid var(--border);
+  border-radius:3px;
+  cursor:pointer;
+  text-decoration:none;
+  transition:all 0.2s;
+  letter-spacing:0.05em;
+}
+.nav-pill:hover{color:var(--neon);border-color:var(--neon);box-shadow:0 0 8px rgba(0,212,255,0.3)}
+.theme-toggle{margin-left:0.5rem;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:0.25rem 0.45rem;font-family:var(--display);font-size:0.62rem;letter-spacing:0.05em;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.theme-toggle:hover{border-color:var(--neon);color:var(--neon);background:rgba(0,0,0,0.25)}
+
+/* ════ SEARCH TRIGGER BUTTON ════ */
+.search-trigger{
+  display:flex;align-items:center;gap:0.5rem;
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:6px;
+  padding:0.35rem 0.8rem;
+  cursor:pointer;
+  transition:all 0.2s;
+  font-family:var(--mono);
+  font-size:0.7rem;
+  color:var(--text2);
+  white-space:nowrap;
+  min-width:160px;
+}
+.search-trigger:hover{
+  border-color:var(--neon);
+  color:var(--neon);
+  box-shadow:0 0 12px rgba(0,212,255,0.2);
+}
+.search-trigger-icon{font-size:0.75rem;color:var(--neon)}
+.search-trigger-text{flex:1;text-align:left}
+.search-trigger-kbd{
+  display:flex;gap:2px;
+}
+.kbd{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:3px;
+  padding:0.1rem 0.3rem;
+  font-size:0.6rem;
+  color:var(--dim);
+  font-family:var(--mono);
+}
+
+/* ════ SEARCH OVERLAY ════ */
+.search-overlay{
+  position:fixed;inset:0;
+  background:rgba(4,10,18,0.75);
+  backdrop-filter:blur(10px);
+  z-index:9500;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:5vh 1rem 0;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.2s ease;
+}
+.search-overlay.open{
+  opacity:1;
+  pointer-events:all;
+}
+.search-modal{
+  width:min(92%,760px);
+  max-height:80vh;
+  background:var(--panel);
+  border:1px solid var(--border2);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 20px 40px rgba(0,0,0,0.35),0 0 25px rgba(0,212,255,0.12);
+  transform:translateY(-24px) scale(0.96);
+  transition:transform 0.2s ease,box-shadow 0.2s ease;
+  animation:searchGlow 0.55s ease;
+}
+@keyframes searchGlow{0%{box-shadow:0 20px 60px rgba(0,0,0,0.32)}100%{box-shadow:0 24px 60px rgba(0,0,0,0.45)}}
+.search-overlay.open .search-modal{
+  transform:translateY(0) scale(1);
+}
+.search-input-row{
+  display:flex;align-items:center;
+  gap:0.75rem;
+  padding:1rem 1.25rem;
+  border-bottom:1px solid var(--border);
+  background:rgba(0,0,0,0.05);
+}
+.search-input{
+  flex:1;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:8px;
+  padding:0.55rem 0.65rem;
+  outline:none;
+  font-family:var(--mono);
+  font-size:1rem;
+  color:var(--text);
+  caret-color:var(--neon);
+  transition:all .15s ease;
+}
+.search-input:focus{border-color:var(--neon);box-shadow:0 0 0 3px rgba(0,212,255,0.15);background:rgba(255,255,255,0.1);}
+.search-results{
+  max-height:56vh;
+  overflow:auto;
+  padding:0.75rem 1rem 1rem;
+  background:var(--panel);
+}
+.result-item{
+  display:flex;align-items:center;gap:0.5rem;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;
+  padding:0.55rem 0.65rem;
+  margin-bottom:0.45rem;
+  cursor:pointer;
+  transition:all .15s;
+}
+.result-item:hover{background:rgba(0,212,255,0.08);border-color:rgba(0,212,255,0.25);}
+.search-empty{padding:1rem; color:var(--dim); text-align:center;}
+
+/* Search input row */
+.search-input-row{
+  display:flex;align-items:center;
+  gap:0.75rem;
+  padding:1rem 1.25rem;
+  border-bottom:1px solid var(--border);
+}
+.search-input-icon{
+  font-size:1rem;
+  color:var(--neon);
+  flex-shrink:0;
+  animation:searchPulse 2s ease-in-out infinite;
+}
+@keyframes searchPulse{
+  0%,100%{text-shadow:0 0 6px rgba(0,212,255,0.4)}
+  50%{text-shadow:0 0 16px rgba(0,212,255,0.9)}
+}
+.search-input{
+  flex:1;
+  background:transparent;
+  border:none;
+  outline:none;
+  font-family:var(--mono);
+  font-size:1rem;
+  color:var(--text);
+  caret-color:var(--neon);
+}
+.search-input::placeholder{color:var(--dim)}
+.search-clear{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:0.2rem 0.5rem;
+  font-family:var(--display);
+  font-size:0.55rem;
+  color:var(--text2);
+  cursor:pointer;
+  letter-spacing:0.1em;
+  transition:all 0.2s;
+  display:none;
+}
+.search-clear:hover{border-color:var(--neon6);color:var(--neon6)}
+.search-clear.visible{display:block}
+
+/* Category filters */
+.search-filters{
+  display:flex;gap:0.4rem;
+  padding:0.6rem 1.25rem;
+  border-bottom:1px solid var(--border);
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.search-filters::-webkit-scrollbar{display:none}
+.filter-chip{
+  font-family:var(--display);
+  font-size:0.55rem;
+  letter-spacing:0.08em;
+  padding:0.25rem 0.65rem;
+  border-radius:20px;
+  border:1px solid var(--border);
+  color:var(--text2);
+  cursor:pointer;
+  transition:all 0.15s;
+  white-space:nowrap;
+  background:transparent;
+}
+.filter-chip:hover{border-color:var(--neon);color:var(--neon)}
+.filter-chip.active{
+  background:rgba(0,212,255,0.12);
+  border-color:var(--neon);
+  color:var(--neon);
+}
+.filter-chip[data-cat="state"].active{background:rgba(255,215,0,0.12);border-color:var(--neon4);color:var(--neon4)}
+.filter-chip[data-cat="commands"].active{background:rgba(0,255,157,0.12);border-color:var(--neon2);color:var(--neon2)}
+.filter-chip[data-cat="modules"].active{background:rgba(183,66,255,0.12);border-color:var(--neon5);color:var(--neon5)}
+.filter-chip[data-cat="cicd"].active{background:rgba(255,107,53,0.12);border-color:var(--neon3);color:var(--neon3)}
+.filter-chip[data-cat="security"].active{background:rgba(255,45,120,0.12);border-color:var(--neon6);color:var(--neon6)}
+.filter-chip[data-cat="advanced"].active{background:rgba(183,66,255,0.12);border-color:var(--neon5);color:var(--neon5)}
+
+/* Results */
+.search-results{
+  max-height:420px;
+  overflow-y:auto;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border2) transparent;
+}
+.search-results::-webkit-scrollbar{width:3px}
+.search-results::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.search-empty{
+  padding:2.5rem 1.25rem;
+  text-align:center;
+  color:var(--dim);
+  font-family:var(--display);
+  font-size:0.7rem;
+  letter-spacing:0.1em;
+}
+.search-empty-icon{font-size:2.5rem;display:block;margin-bottom:0.75rem;opacity:0.5}
+
+.result-group-label{
+  font-family:var(--display);
+  font-size:0.55rem;
+  letter-spacing:0.2em;
+  color:var(--dim);
+  padding:0.5rem 1.25rem 0.25rem;
+  text-transform:uppercase;
+  position:sticky;top:0;
+  background:var(--panel);
+  border-bottom:1px solid rgba(26,58,92,0.4);
+  z-index:1;
+}
+
+.result-item{
+  display:flex;align-items:center;
+  gap:0.9rem;
+  padding:0.75rem 1.25rem;
+  cursor:pointer;
+  transition:background 0.12s;
+  border-bottom:1px solid rgba(26,58,92,0.3);
+  position:relative;
+}
+.result-item:last-child{border-bottom:none}
+.result-item:hover,.result-item.focused{
+  background:rgba(0,212,255,0.05);
+}
+.result-item.focused::before{
+  content:'';
+  position:absolute;left:0;top:0;bottom:0;
+  width:3px;
+  background:var(--neon);
+  border-radius:0 2px 2px 0;
+}
+.result-icon{
+  font-size:1.2rem;
+  width:32px;
+  height:32px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg3);
+  border-radius:6px;
+  flex-shrink:0;
+  border:1px solid var(--border);
+}
+.result-body{flex:1;min-width:0}
+.result-title{
+  font-family:var(--display);
+  font-size:0.78rem;
+  letter-spacing:0.03em;
+  color:var(--text);
+  margin-bottom:0.15rem;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.result-title mark{
+  background:transparent;
+  color:var(--neon);
+  font-weight:700;
+}
+.result-desc{
+  font-size:0.72rem;
+  color:var(--text2);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.result-desc mark{
+  background:transparent;
+  color:var(--neon2);
+}
+.result-meta{
+  display:flex;flex-direction:column;align-items:flex-end;gap:0.25rem;
+  flex-shrink:0;
+}
+.result-cat{
+  font-family:var(--display);
+  font-size:0.5rem;
+  letter-spacing:0.1em;
+  padding:0.15rem 0.4rem;
+  border-radius:3px;
+  border:1px solid var(--border);
+  color:var(--text2);
+}
+.result-shortcut{
+  font-family:var(--mono);
+  font-size:0.55rem;
+  color:var(--dim);
+}
+
+/* Footer hint bar */
+.search-footer{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:0.5rem 1.25rem;
+  border-top:1px solid var(--border);
+  background:var(--bg3);
+}
+.search-hints{
+  display:flex;gap:1rem;
+}
+.search-hint{
+  display:flex;align-items:center;gap:0.3rem;
+  font-size:0.6rem;
+  color:var(--dim);
+}
+.search-hint .kbd{font-size:0.55rem}
+.search-count{
+  font-family:var(--display);
+  font-size:0.55rem;
+  color:var(--dim);
+  letter-spacing:0.1em;
+}
+
+/* Result category color dots */
+.result-dot{
+  width:6px;height:6px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+
+/* ════ XP POPUP ════ */
+.xp-popup{
+  position:fixed;
+  top:80px;right:20px;
+  background:var(--panel);
+  border:1px solid var(--neon4);
+  border-radius:8px;
+  padding:0.5rem 1rem;
+  font-family:var(--display);
+  font-size:0.75rem;
+  color:var(--neon4);
+  z-index:200;
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(-10px);
+  transition:all 0.3s;
+  box-shadow:0 0 20px rgba(255,215,0,0.3);
+}
+.xp-popup.show{opacity:1;transform:translateY(0)}
+
+/* ════ HERO ════ */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  padding:6rem 2rem 3rem;
+  position:relative;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 50%,rgba(0,212,255,0.06) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 50%,rgba(183,66,255,0.06) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 10%,rgba(0,255,157,0.05) 0%,transparent 60%);
+}
+.grid-lines{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,0.05) 1px,transparent 1px);
+  background-size:40px 40px;
+  animation:gridMove 20s linear infinite;
+}
+@keyframes gridMove{
+  0%{transform:translate(0,0)}
+  100%{transform:translate(40px,40px)}
+}
+.hero-title{
+  font-family:var(--display);
+  font-size:clamp(2.5rem,7vw,5.5rem);
+  font-weight:900;
+  line-height:1;
+  letter-spacing:0.05em;
+  position:relative;
+  margin-bottom:1rem;
+}
+.hero-title .line1{
+  display:block;
+  color:var(--neon);
+  text-shadow:0 0 40px rgba(0,212,255,0.8),0 0 80px rgba(0,212,255,0.4);
+  animation:titleFlicker 5s infinite;
+}
+.hero-title .line2{
+  display:block;
+  color:var(--text);
+  font-size:0.5em;
+  letter-spacing:0.3em;
+  text-transform:uppercase;
+  margin-top:0.5rem;
+}
+@keyframes titleFlicker{
+  0%,95%,100%{opacity:1}
+  96%{opacity:0.8}
+  97%{opacity:1}
+  98%{opacity:0.7}
+}
+.hero-sub{
+  font-size:1.1rem;
+  color:var(--text2);
+  max-width:550px;
+  margin:0 auto 2.5rem;
+}
+.hero-chips{
+  display:flex;gap:0.5rem;justify-content:center;
+  flex-wrap:wrap;margin-bottom:2.5rem;
+}
+.chip{
+  font-family:var(--display);
+  font-size:0.6rem;
+  letter-spacing:0.1em;
+  padding:0.3rem 0.8rem;
+  border-radius:2px;
+  border:1px solid;
+}
+.chip-neon{border-color:var(--neon);color:var(--neon);background:rgba(0,212,255,0.08)}
+.chip-green{border-color:var(--neon2);color:var(--neon2);background:rgba(0,255,157,0.08)}
+.chip-orange{border-color:var(--neon3);color:var(--neon3);background:rgba(255,107,53,0.08)}
+.chip-gold{border-color:var(--neon4);color:var(--neon4);background:rgba(255,215,0,0.08)}
+.start-btn{
+  font-family:var(--display);
+  font-size:0.85rem;
+  font-weight:700;
+  letter-spacing:0.15em;
+  padding:1rem 2.5rem;
+  background:transparent;
+  border:2px solid var(--neon);
+  color:var(--neon);
+  border-radius:4px;
+  cursor:pointer;
+  transition:all 0.3s;
+  position:relative;
+  overflow:hidden;
+  text-transform:uppercase;
+}
+.start-btn::before{
+  content:'';
+  position:absolute;inset:0;
+  background:var(--neon);
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform 0.3s;
+  z-index:-1;
+}
+.start-btn:hover{color:var(--bg);box-shadow:0 0 30px rgba(0,212,255,0.5)}
+.start-btn:hover::before{transform:scaleX(1)}
+
+/* ════ SECTION ════ */
+section{padding:4rem 0;position:relative}
+.container{width:min(100%,1100px);margin:0 auto;padding:0 1.5rem;}
+.sec-label{
+  font-family:var(--display);
+  font-size:0.6rem;
+  letter-spacing:0.3em;
+  color:var(--neon);
+  text-transform:uppercase;
+  margin-bottom:0.5rem;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.sec-label::before{
+  content:'▶';font-size:0.5rem;
+}
+.sec-title{
+  font-family:var(--display);
+  font-size:clamp(1.5rem,3vw,2.2rem);
+  font-weight:900;
+  letter-spacing:0.05em;
+  margin-bottom:0.5rem;
+  color:var(--text);
+}
+.sec-title span{color:var(--neon)}
+.sec-sub{
+  color:var(--text2);
+  font-size:0.95rem;
+  max-width:600px;
+}
+
+/* ════ CONCEPT CARDS GRID ════ */
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:1rem;
+  margin-top:2rem;
+}
+.concept-card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:1.5rem;
+  position:relative;
+  overflow:hidden;
+  transition:all 0.3s;
+  cursor:pointer;
+}
+.concept-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--accent-color,var(--neon));
+}
+.concept-card:hover{
+  border-color:var(--accent-color,var(--neon));
+  transform:translateY(-4px);
+  box-shadow:0 8px 30px rgba(0,0,0,0.4),0 0 20px rgba(0,212,255,0.1);
+}
+.cc-icon{font-size:2rem;margin-bottom:0.75rem;display:block}
+.cc-name{
+  font-family:var(--display);
+  font-size:0.8rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  color:var(--text);
+  margin-bottom:0.4rem;
+}
+.cc-analogy{
+  font-size:0.8rem;
+  color:var(--neon2);
+  font-style:italic;
+  margin-bottom:0.5rem;
+}
+.cc-desc{font-size:0.82rem;color:var(--text2);line-height:1.5}
+.cc-badge{
+  display:inline-block;
+  font-family:var(--display);
+  font-size:0.55rem;
+  letter-spacing:0.1em;
+  padding:0.2rem 0.5rem;
+  border-radius:2px;
+  margin-top:0.75rem;
+}
+.badge-b{background:rgba(0,255,157,0.15);color:var(--neon2);border:1px solid rgba(0,255,157,0.3)}
+.badge-i{background:rgba(255,215,0,0.15);color:var(--neon4);border:1px solid rgba(255,215,0,0.3)}
+.badge-a{background:rgba(255,107,53,0.15);color:var(--neon3);border:1px solid rgba(255,107,53,0.3)}
+.badge-e{background:rgba(183,66,255,0.15);color:var(--neon5);border:1px solid rgba(183,66,255,0.3)}
+
+/* ════ VISUAL DIAGRAMS ════ */
+.diagram{
+  background:var(--panel);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:2rem;
+  margin:2rem 0;
+  position:relative;
+  overflow:hidden;
+}
+.diagram-title{
+  font-family:var(--display);
+  font-size:0.65rem;
+  letter-spacing:0.2em;
+  color:var(--neon);
+  text-transform:uppercase;
+  margin-bottom:1.5rem;
+  text-align:center;
+}
+.tf-flow{
+  display:flex;align-items:center;
+  justify-content:center;
+  gap:0;flex-wrap:wrap;
+  position:relative;
+}
+.tf-node{
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:1rem 1.25rem;
+  text-align:center;
+  min-width:110px;
+  position:relative;
+  transition:all 0.3s;
+  cursor:pointer;
+}
+.tf-node:hover{
+  border-color:var(--neon);
+  box-shadow:0 0 20px rgba(0,212,255,0.2);
+}
+.tf-node-icon{font-size:1.5rem;display:block;margin-bottom:0.3rem}
+.tf-node-name{
+  font-family:var(--display);
+  font-size:0.6rem;
+  letter-spacing:0.1em;
+  color:var(--neon);
+}
+.tf-node-desc{font-size:0.7rem;color:var(--text2);margin-top:0.2rem}
+.tf-arrow{
+  width:40px;height:2px;
+  background:linear-gradient(90deg,var(--border2),var(--neon));
+  position:relative;flex-shrink:0;
+}
+.tf-arrow::after{
+  content:'▶';
+  position:absolute;right:-6px;top:-7px;
+  color:var(--neon);font-size:0.7rem;
+}
+.tf-arrow.vertical{
+  width:2px;height:30px;
+  background:linear-gradient(180deg,var(--border2),var(--neon));
+}
+.tf-arrow.vertical::after{
+  content:'▼';
+  position:absolute;bottom:-10px;left:-5px;top:auto;right:auto;
+}
+
+/* ════ INTERACTIVE CODE RUNNER ════ */
+.code-lab{
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  overflow:hidden;
+  margin:2rem 0;
+}
+.code-lab-header{
+  background:var(--bg3);
+  border-bottom:1px solid var(--border);
+  padding:0.75rem 1.25rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.code-lab-title{
+  font-family:var(--display);
+  font-size:0.65rem;
+  letter-spacing:0.15em;
+  color:var(--neon2);
+}
+.code-dots{display:flex;gap:5px}
+.code-dot{width:10px;height:10px;border-radius:50%}
+.cd1{background:#ff5f57}.cd2{background:#febc2e}.cd3{background:#28c840}
+.code-body{
+  padding:1.5rem;
+  font-family:var(--mono);
+  font-size:0.78rem;
+  line-height:1.9;
+  overflow-x:auto;
+  white-space:pre;
+}
+.kw{color:#ff79c6}.str{color:#f1fa8c}.cmt{color:#6272a4;font-style:italic}
+.key{color:#8be9fd}.val{color:#bd93f9}.num{color:#ffb86c}.fn{color:#50fa7b}
+.hl{background:rgba(255,255,157,0.1);display:block;margin:0 -1.5rem;padding:0 1.5rem}
+
+/* ════ FLASHCARDS ════ */
+.flashcard-arena{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:1.25rem;
+  margin:2rem 0;
+}
+.flashcard{
+  height:160px;
+  perspective:1000px;
+  cursor:pointer;
+}
+.flashcard-inner{
+  width:100%;height:100%;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.flashcard:hover .flashcard-inner,
+.flashcard.flipped .flashcard-inner{
+  transform:rotateY(180deg);
+}
+.card-front,.card-back{
+  position:absolute;inset:0;
+  backface-visibility:hidden;
+  border-radius:10px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:1.25rem;
+  text-align:center;
+}
+.card-front{
+  background:var(--panel);
+  border:1px solid var(--border2);
+}
+.card-back{
+  background:var(--bg3);
+  border:1px solid var(--neon);
+  transform:rotateY(180deg);
+  box-shadow:0 0 20px rgba(0,212,255,0.15);
+}
+.card-front-q{
+  font-family:var(--display);
+  font-size:0.75rem;
+  letter-spacing:0.05em;
+  color:var(--text);
+  line-height:1.4;
+}
+.card-back-a{
+  font-size:0.82rem;
+  color:var(--neon2);
+  line-height:1.5;
+}
+.card-front-hint{
+  font-size:0.6rem;
+  color:var(--dim);
+  margin-top:0.5rem;
+  font-family:var(--display);
+  letter-spacing:0.1em;
+}
+
+/* ════ QUIZ GAME ════ */
+.quiz-game{
+  background:var(--panel);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:2rem;
+  margin:2rem 0;
+}
+.quiz-progress{
+  display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;
+}
+.quiz-prog-bar{
+  flex:1;height:6px;
+  background:var(--bg3);
+  border-radius:3px;
+  overflow:hidden;
+}
+.quiz-prog-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--neon),var(--neon2));
+  border-radius:3px;
+  transition:width 0.5s ease;
+}
+.quiz-streak{
+  font-family:var(--display);
+  font-size:0.65rem;
+  color:var(--neon3);
+  letter-spacing:0.1em;
+}
+.quiz-q-text{
+  font-family:var(--display);
+  font-size:0.95rem;
+  font-weight:700;
+  letter-spacing:0.03em;
+  color:var(--text);
+  margin-bottom:1.5rem;
+  line-height:1.4;
+}
+.quiz-opts{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0.75rem;
+}
+.quiz-opt-btn{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:0.9rem 1rem;
+  text-align:left;
+  cursor:pointer;
+  transition:all 0.2s;
+  font-family:var(--body);
+  font-size:0.82rem;
+  color:var(--text2);
+  display:flex;align-items:flex-start;gap:0.6rem;
+}
+.quiz-opt-btn:hover:not(:disabled){
+  border-color:var(--neon);
+  color:var(--text);
+  background:rgba(0,212,255,0.05);
+}
+.quiz-opt-btn.correct{border-color:var(--neon2);background:rgba(0,255,157,0.1);color:var(--neon2)}
+.quiz-opt-btn.wrong{border-color:var(--neon6);background:rgba(255,45,120,0.1);color:var(--neon6)}
+.opt-letter{
+  font-family:var(--display);
+  font-size:0.6rem;
+  width:20px;height:20px;
+  background:var(--dim);
+  border-radius:3px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;color:var(--text);
+}
+.quiz-explain{
+  margin-top:1rem;
+  padding:0.9rem 1.1rem;
+  background:rgba(0,255,157,0.06);
+  border:1px solid rgba(0,255,157,0.2);
+  border-radius:6px;
+  font-size:0.82rem;
+  color:var(--neon2);
+  line-height:1.6;
+  display:none;
+}
+.quiz-next{
+  margin-top:1rem;
+  font-family:var(--display);
+  font-size:0.7rem;
+  letter-spacing:0.15em;
+  padding:0.6rem 1.5rem;
+  background:transparent;
+  border:1px solid var(--neon);
+  color:var(--neon);
+  border-radius:4px;
+  cursor:pointer;
+  transition:all 0.2s;
+  display:none;
+}
+.quiz-next:hover{background:var(--neon);color:var(--bg)}
+
+/* ════ DRAG & DROP GAME ════ */
+.drag-game{
+  background:var(--panel);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:2rem;
+  margin:2rem 0;
+}
+.drag-title{
+  font-family:var(--display);
+  font-size:0.65rem;
+  letter-spacing:0.2em;
+  color:var(--neon3);
+  margin-bottom:1rem;
+  text-align:center;
+}
+.drag-board{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1.5rem;
+}
+.drag-pile{
+  display:flex;flex-direction:column;gap:0.5rem;
+}
+.drag-pile-title{
+  font-family:var(--display);
+  font-size:0.6rem;
+  letter-spacing:0.15em;
+  color:var(--text2);
+  margin-bottom:0.25rem;
+  text-align:center;
+}
+.drag-item{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:0.6rem 0.9rem;
+  font-family:var(--mono);
+  font-size:0.75rem;
+  color:var(--text);
+  cursor:grab;
+  transition:all 0.2s;
+  user-select:none;
+}
+.drag-item:hover{border-color:var(--neon3);color:var(--neon3)}
+.drag-item.dragging{opacity:0.5;border-color:var(--neon);cursor:grabbing}
+.drop-zone{
+  background:var(--bg2);
+  border:2px dashed var(--border);
+  border-radius:8px;
+  padding:0.75rem;
+  min-height:60px;
+  display:flex;flex-direction:column;gap:0.4rem;
+  transition:all 0.2s;
+}
+.drop-zone.drag-over{border-color:var(--neon);background:rgba(0,212,255,0.05)}
+.drop-zone-label{
+  font-size:0.65rem;
+  color:var(--dim);
+  text-align:center;
+  font-family:var(--display);
+  letter-spacing:0.1em;
+  margin-bottom:0.4rem;
+}
+.drag-check-btn{
+  margin-top:1rem;
+  font-family:var(--display);
+  font-size:0.7rem;
+  letter-spacing:0.15em;
+  padding:0.6rem 1.5rem;
+  background:transparent;
+  border:1px solid var(--neon2);
+  color:var(--neon2);
+  border-radius:4px;
+  cursor:pointer;
+  transition:all 0.2s;
+  width:100%;
+}
+.drag-check-btn:hover{background:var(--neon2);color:var(--bg)}
+.drag-result{
+  margin-top:0.75rem;
+  font-size:0.82rem;
+  font-family:var(--display);
+  text-align:center;
+  letter-spacing:0.05em;
+  display:none;
+}
+.drag-result.correct{color:var(--neon2)}
+.drag-result.wrong{color:var(--neon6)}
+
+/* ════ MEMORY MATCH GAME ════ */
+.match-game{
+  background:var(--panel);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:2rem;
+  margin:2rem 0;
+}
+.match-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:0.6rem;
+  margin-top:1.5rem;
+}
+.match-card{
+  aspect-ratio:1;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:all 0.3s;
+  position:relative;
+  overflow:hidden;
+}
+.match-card:hover{border-color:var(--neon5)}
+.match-card.revealed{
+  background:var(--bg2);
+  border-color:var(--neon);
+}
+.match-card.matched{
+  background:rgba(0,255,157,0.1);
+  border-color:var(--neon2);
+  cursor:default;
+}
+.match-card-inner{
+  font-size:0.72rem;
+  color:var(--text2);
+  text-align:center;
+  padding:0.4rem;
+  display:none;
+  font-family:var(--mono);
+}
+.match-card.revealed .match-card-inner,
+.match-card.matched .match-card-inner{display:flex;align-items:center;justify-content:center}
+.match-card-back{
+  font-size:1.5rem;
+}
+.match-card.revealed .match-card-back,
+.match-card.matched .match-card-back{display:none}
+.match-stats{
+  display:flex;gap:2rem;justify-content:center;margin-bottom:1rem;
+}
+.match-stat{text-align:center}
+.match-stat-n{
+  font-family:var(--display);
+  font-size:1.2rem;
+  color:var(--neon5);
+}
+.match-stat-l{font-size:0.65rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em}
+
+/* ════ ANALOGY BUILDER ════ */
+.analogy-box{
+  background:linear-gradient(135deg,rgba(0,212,255,0.05),rgba(183,66,255,0.05));
+  border:1px solid rgba(0,212,255,0.2);
+  border-radius:10px;
+  padding:1.5rem;
+  margin:1.5rem 0;
+  position:relative;
+}
+.analogy-box::before{
+  content:'ANALOGY';
+  font-family:var(--display);
+  font-size:0.55rem;
+  letter-spacing:0.25em;
+  color:var(--neon);
+  display:block;
+  margin-bottom:0.75rem;
+  padding-bottom:0.5rem;
+  border-bottom:1px solid rgba(0,212,255,0.2);
+}
+.analogy-compare{
+  display:grid;grid-template-columns:1fr auto 1fr;
+  align-items:center;gap:1rem;
+  margin-top:0.5rem;
+}
+.analogy-side{
+  background:var(--bg3);
+  border-radius:8px;
+  padding:1rem;
+  text-align:center;
+}
+.analogy-emoji{font-size:2rem;display:block;margin-bottom:0.4rem}
+.analogy-label{
+  font-family:var(--display);
+  font-size:0.65rem;
+  letter-spacing:0.1em;
+  color:var(--neon);
+  display:block;margin-bottom:0.3rem;
+}
+.analogy-desc{font-size:0.8rem;color:var(--text2)}
+.analogy-eq{
+  font-family:var(--display);
+  font-size:1.5rem;
+  color:var(--neon4);
+}
+
+/* ════ MEMORY TRICK ════ */
+.memory-trick{
+  background:rgba(0,255,157,0.04);
+  border:1px solid rgba(0,255,157,0.2);
+  border-radius:10px;
+  padding:1.25rem 1.5rem;
+  margin:1.5rem 0;
+}
+.memory-trick::before{
+  content:'🧠 MEMORY TRICK';
+  font-family:var(--display);
+  font-size:0.55rem;
+  letter-spacing:0.25em;
+  color:var(--neon2);
+  display:block;
+  margin-bottom:0.6rem;
+}
+.memory-trick p{font-size:0.9rem;color:var(--text);line-height:1.6}
+.memory-trick strong{color:var(--neon2)}
+.memory-trick ul{padding-left:1.5rem;margin-top:0.4rem}
+.memory-trick li{font-size:0.85rem;color:var(--text2);margin-bottom:0.2rem}
+
+/* ════ STORY BOX ════ */
+.story-box{
+  background:rgba(255,107,53,0.04);
+  border-left:3px solid var(--neon3);
+  padding:1.25rem 1.5rem;
+  margin:1.5rem 0;
+  border-radius:0 10px 10px 0;
+}
+.story-box::before{
+  content:'📖 THE STORY';
+  font-family:var(--display);
+  font-size:0.55rem;
+  letter-spacing:0.25em;
+  color:var(--neon3);
+  display:block;
+  margin-bottom:0.6rem;
+}
+.story-box p{font-size:0.9rem;color:var(--text);line-height:1.7}
+.story-box em{color:var(--neon3)}
+
+/* ════ WARNING / INFO BOXES ════ */
+.warn-box{
+  background:rgba(255,45,120,0.06);
+  border:1px solid rgba(255,45,120,0.3);
+  border-radius:8px;
+  padding:1rem 1.25rem;
+  margin:1rem 0;
+  font-size:0.85rem;
+  color:var(--neon6);
+  display:flex;gap:0.75rem;align-items:flex-start;
+}
+.warn-box::before{content:'⚠';flex-shrink:0}
+.info-box{
+  background:rgba(0,212,255,0.05);
+  border:1px solid rgba(0,212,255,0.2);
+  border-radius:8px;
+  padding:1rem 1.25rem;
+  margin:1rem 0;
+  font-size:0.85rem;
+  color:var(--neon);
+  display:flex;gap:0.75rem;align-items:flex-start;
+}
+.info-box::before{content:'💡';flex-shrink:0}
+.pro-box{
+  background:rgba(183,66,255,0.06);
+  border:1px solid rgba(183,66,255,0.3);
+  border-radius:8px;
+  padding:1rem 1.25rem;
+  margin:1rem 0;
+  font-size:0.85rem;
+  color:var(--neon5);
+  display:flex;gap:0.75rem;align-items:flex-start;
+}
+.pro-box::before{content:'⚡';flex-shrink:0}
+
+/* ════ TABS ════ */
+.tab-group{margin:1.5rem 0}
+.tab-nav{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+}
+.tab-btn{
+  font-family:var(--display);
+  font-size:0.6rem;
+  letter-spacing:0.1em;
+  padding:0.5rem 1rem;
+  background:transparent;
+  border:none;
+  border-bottom:2px solid transparent;
+  color:var(--text2);
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.tab-btn.active{color:var(--neon);border-bottom-color:var(--neon)}
+.tab-btn:hover{color:var(--text)}
+.tab-pane{display:none;padding-top:1.25rem}
+.tab-pane.active{display:block}
+
+/* ════ SECTION DIVIDER ════ */
+.divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--border2),transparent);
+  margin:3rem 0;
+  position:relative;
+}
+.divider::after{
+  content:'◆';
+  position:absolute;left:50%;top:-0.5rem;
+  transform:translateX(-50%);
+  color:var(--border2);font-size:0.6rem;
+  background:var(--bg);padding:0 0.5rem;
+}
+
+/* ════ PROGRESS TRACKER ════ */
+.topic-tracker{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:0.5rem;
+  margin:1.5rem 0;
+}
+.topic-pill{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:0.5rem 0.75rem;
+  font-family:var(--display);
+  font-size:0.6rem;
+  letter-spacing:0.05em;
+  color:var(--text2);
+  cursor:pointer;
+  transition:all 0.2s;
+  text-align:center;
+  position:relative;
+}
+.topic-pill.learned{
+  border-color:var(--neon2);
+  color:var(--neon2);
+  background:rgba(0,255,157,0.08);
+}
+.topic-pill.learned::after{
+  content:'✓';
+  position:absolute;top:2px;right:4px;
+  font-size:0.5rem;color:var(--neon2);
+}
+.topic-pill:hover{border-color:var(--neon);color:var(--neon)}
+
+/* ════ ACHIEVEMENT TOASTS ════ */
+.achievements{
+  position:fixed;bottom:20px;right:20px;
+  display:flex;flex-direction:column;gap:0.5rem;
+  z-index:500;pointer-events:none;
+}
+.achievement{
+  background:var(--panel);
+  border:1px solid var(--neon4);
+  border-radius:8px;
+  padding:0.6rem 1rem;
+  display:flex;align-items:center;gap:0.6rem;
+  opacity:0;transform:translateX(20px);
+  transition:all 0.4s;
+  max-width:280px;
+}
+.achievement.show{opacity:1;transform:translateX(0)}
+.ach-icon{font-size:1.2rem}
+.ach-text{font-size:0.75rem;color:var(--neon4);font-family:var(--display);letter-spacing:0.05em}
+
+/* ════ TABLE ════ */
+table{width:100%;border-collapse:collapse;margin:1rem 0}
+th{
+  font-family:var(--display);font-size:0.6rem;
+  letter-spacing:0.15em;color:var(--neon);
+  text-align:left;padding:0.6rem 0.9rem;
+  border-bottom:1px solid var(--border2);
+  text-transform:uppercase;
+}
+td{
+  padding:0.65rem 0.9rem;
+  border-bottom:1px solid var(--border);
+  font-size:0.82rem;color:var(--text2);
+  vertical-align:top;
+}
+td:first-child{font-family:var(--mono);font-size:0.75rem;color:var(--neon2)}
+tr:hover td{background:rgba(255,255,255,0.02)}
+
+/* ════ COMMAND CARDS ════ */
+.cmd-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:0.75rem;margin:1.5rem 0;
+}
+.cmd-card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:1rem 1.25rem;
+  transition:all 0.2s;
+  cursor:pointer;
+}
+.cmd-card:hover{border-color:var(--neon3);transform:translateY(-2px)}
+.cmd-code{
+  font-family:var(--mono);
+  font-size:0.75rem;
+  color:var(--neon2);
+  background:var(--bg3);
+  padding:0.3rem 0.6rem;
+  border-radius:4px;
+  display:inline-block;
+  margin-bottom:0.5rem;
+}
+.light-mode .cmd-code {
+  color:#0d3273;
+  background:rgba(220,235,255,0.74);
+  border:1px solid rgba(96,129,194,0.3);
+}
+.light-mode .cmd-card {
+  background:rgba(255,255,255,0.7);
+  border-color:rgba(115,150,220,0.24);
+}
+.light-mode .cmd-desc { color:#2f4f7f; }
+.cmd-emoji{font-size:1.1rem;margin-bottom:0.4rem;display:block}
+.cmd-desc{font-size:0.78rem;color:var(--text2);line-height:1.4}
+.cmd-trick{
+  font-size:0.72rem;
+  color:var(--neon3);
+  margin-top:0.4rem;
+  font-style:italic;
+}
+
+/* ════ PIPELINE BUILDER (interactive) ════ */
+.pipeline{
+  display:flex;
+  align-items:stretch;
+  gap:0;
+  border:1px solid var(--border2);
+  border-radius:12px;
+  overflow:hidden;
+  margin:1.5rem 0;
+}
+.pipeline-stage{
+  flex:1;
+  padding:1.25rem 1rem;
+  background:var(--panel);
+  border-right:1px solid var(--border);
+  text-align:center;
+  position:relative;
+  cursor:pointer;
+  transition:all 0.3s;
+}
+.pipeline-stage:last-child{border-right:none}
+.pipeline-stage:hover,.pipeline-stage.active{background:var(--bg3)}
+.pipeline-stage::after{
+  content:'▶';
+  position:absolute;right:-8px;top:50%;transform:translateY(-50%);
+  color:var(--neon);font-size:0.7rem;z-index:1;
+}
+.pipeline-stage:last-child::after{display:none}
+.ps-icon{font-size:1.5rem;display:block;margin-bottom:0.4rem}
+.ps-name{
+  font-family:var(--display);font-size:0.55rem;
+  letter-spacing:0.1em;color:var(--neon);
+}
+.ps-detail{
+  font-size:0.7rem;color:var(--text2);margin-top:0.3rem;line-height:1.3;
+}
+.pipeline-info{
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:1.25rem;
+  margin-top:0.75rem;
+  font-size:0.85rem;
+  color:var(--text);
+  line-height:1.6;
+  display:none;
+}
+.pipeline-info.active{display:block}
+
+/* ════ SCROLLYTELL VISUAL ════ */
+.visual-story{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:2rem;
+  align-items:center;
+  margin:2rem 0;
+}
+.vs-visual{
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:1.5rem;
+  text-align:center;
+}
+.vs-text h3{
+  font-family:var(--display);
+  font-size:0.85rem;
+  font-weight:700;
+  letter-spacing:0.1em;
+  color:var(--neon);
+  margin-bottom:0.75rem;
+}
+.vs-text p{font-size:0.88rem;color:var(--text2);line-height:1.6}
+.big-emoji{font-size:5rem;display:block;margin-bottom:0.5rem;
+  animation:float 3s ease-in-out infinite}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-10px)}
+}
+
+/* ════ CHEATSHEET ════ */
+.cheat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:1rem;margin:1.5rem 0;
+}
+.cheat-card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+}
+.cheat-card-header{
+  background:var(--bg3);
+  padding:0.6rem 1rem;
+  font-family:var(--display);
+  font-size:0.6rem;
+  letter-spacing:0.15em;
+  color:var(--neon4);
+  border-bottom:1px solid var(--border);
+}
+.cheat-card-body{padding:0.75rem 1rem;font-family:var(--mono);font-size:0.72rem;line-height:1.7;color:var(--text2);overflow-x:auto;white-space:pre}
+
+/* ════ FOOTER ════ */
+footer{
+  border-top:1px solid var(--border2);
+  padding:2rem;text-align:center;
+}
+.footer-logo{
+  font-family:var(--display);
+  font-size:1rem;font-weight:900;
+  color:var(--neon);
+  text-shadow:0 0 20px var(--neon);
+  margin-bottom:0.4rem;
+}
+.footer-sub{font-family:var(--display);font-size:0.6rem;letter-spacing:0.1em;color:var(--dim)}
+
+/* ════ MOBILE ════ */
+@media(max-width:960px){
+  .hud{flex-wrap:wrap;gap:0.5rem;justify-content:center}
+  .hud-xp,.hud-stats{min-width:180px}
+  .search-trigger{flex:1 1 100%;justify-content:space-between;min-width:0;padding:0.5rem 0.7rem;font-size:0.8rem}
+  .search-trigger-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .theme-toggle{margin-left:auto;flex:1 1 auto;min-width:120px}
+}
+
+@media(max-width:768px){
+  .nav-pills{display:none}
+  .search-overlay{padding:2vh 0.5rem 0;}
+  .search-modal{width:100%;max-width:100%;border-radius:12px;}
+  .search-input-row{padding:0.75rem;}
+  .search-input{font-size:0.9rem;height:2.2rem;}
+  .search-clear{padding:0.35rem 0.55rem;font-size:0.7rem;}
+  .search-filters{flex-wrap:wrap;gap:0.35rem;}
+  .filter-chip{font-size:0.65rem;padding:0.35rem 0.6rem;}
+  .search-results{max-height:46vh;}
+  .search-footer{flex-wrap:wrap;gap:0.35rem;}
+  .hud{padding:0.7rem;}
+  .hero{padding:3rem 1rem 2rem;}
+  .hero h1{font-size:2.2rem;}
+  .hero p{font-size:0.95rem;}
+  .container{max-width:100%;padding:0 0.7rem;}
+  .visual-story{grid-template-columns:1fr}
+  .analogy-compare{grid-template-columns:1fr}
+  .pipeline{flex-direction:column}
+  .pipeline-stage{padding:1rem 0.6rem;font-size:0.7rem;}
+  .pipeline-stage::after{display:none}
+  .match-grid{grid-template-columns:repeat(2,1fr)}
+  .quiz-opts{grid-template-columns:1fr}
+  .drag-board{grid-template-columns:1fr}
+  .cheat-grid{grid-template-columns:1fr}
+  .learn-pop,.xp-popup{width:min(90%,320px);font-size:0.82rem;}
+  .container, .hero, .search-input-row {margin-left:auto;margin-right:auto;}
+  body{overflow-x:hidden;}
+}
+
+@media(max-width:560px){
+  .search-trigger{padding:0.45rem 0.5rem;font-size:0.8rem;}
+  .save-card,.tip-card,.section-card{padding:0.65rem;}
+  .quiz-static{font-size:0.72rem;}
+  .hero{padding:2.6rem 0.6rem 1.5rem;}
+  .hero h1{font-size:1.6rem;}
+  .hero p{font-size:0.82rem;}
+  .container{padding:0 0.5rem;}
+}
+
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- XP Popup -->
+<div class="xp-popup" id="xpPopup">+XP EARNED!</div>
+
+<!-- Achievements -->
+<div class="achievements" id="achievements"></div>
+
+<!-- ════ HUD ════ -->
+<div class="hud">
+  <div class="hud-logo">TF QUEST</div>
+  <div class="hud-xp">
+    <span class="xp-label">XP</span>
+    <div class="xp-bar-wrap"><div class="xp-bar" id="xpBar"></div></div>
+    <span class="xp-num" id="xpNum">0 / 1000</span>
+  </div>
+  <div class="hud-stats">
+    <div class="hud-stat">
+      <div class="hud-stat-n" id="streakNum">0</div>
+      <div class="hud-stat-l">Streak 🔥</div>
+    </div>
+    <div class="hud-stat">
+      <div class="hud-stat-n" id="learnedNum">0</div>
+      <div class="hud-stat-l">Learned</div>
+    </div>
+  </div>
+  <nav class="nav-pills">
+    <a class="nav-pill" href="#basics">Basics</a>
+    <a class="nav-pill" href="#state">State</a>
+    <a class="nav-pill" href="#modules">Modules</a>
+    <a class="nav-pill" href="#loops">Loops</a>
+    <a class="nav-pill" href="#cicd">CI/CD</a>
+    <a class="nav-pill" href="#security">Security</a>
+    <a class="nav-pill" href="#advanced">Advanced</a>
+    <a class="nav-pill" href="#quiz-zone">Quiz</a>
+    <a class="nav-pill" href="#games">Games</a>
+  </nav>
+  <button class="search-trigger" onclick="openSearch()" id="searchTrigger" title="Search concepts (Ctrl+K / Cmd+K)">
+    <span class="search-trigger-icon">&#9906;</span>
+    <span class="search-trigger-text">Search concepts...</span>
+    <span class="search-trigger-kbd">
+      <span class="kbd">Ctrl</span><span class="kbd">K</span>
+    </span>
+  </button>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">☀ Light</button>
+</div>
+
+<!-- ════ SEARCH OVERLAY ════ -->
+<div class="search-overlay" id="searchOverlay" onclick="handleOverlayClick(event)">
+  <div class="search-modal" id="searchModal">
+    <div class="search-input-row">
+      <span class="search-input-icon">&#9906;</span>
+      <input
+        class="search-input"
+        id="searchInput"
+        placeholder="Search Terraform concepts, commands, topics..."
+        autocomplete="off"
+        spellcheck="false"
+        oninput="handleSearch(this.value)"
+        onkeydown="handleSearchKey(event)"
+      />
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">CLEAR</button>
+    </div>
+    <div class="search-filters" id="searchFilters">
+      <button class="filter-chip active" data-cat="all" onclick="setFilter('all',this)">All</button>
+      <button class="filter-chip" data-cat="basics" onclick="setFilter('basics',this)">Basics</button>
+      <button class="filter-chip" data-cat="commands" onclick="setFilter('commands',this)">Commands</button>
+      <button class="filter-chip" data-cat="state" onclick="setFilter('state',this)">State</button>
+      <button class="filter-chip" data-cat="modules" onclick="setFilter('modules',this)">Modules</button>
+      <button class="filter-chip" data-cat="loops" onclick="setFilter('loops',this)">Loops</button>
+      <button class="filter-chip" data-cat="cicd" onclick="setFilter('cicd',this)">CI/CD</button>
+      <button class="filter-chip" data-cat="security" onclick="setFilter('security',this)">Security</button>
+      <button class="filter-chip" data-cat="advanced" onclick="setFilter('advanced',this)">Advanced</button>
+      <button class="filter-chip" data-cat="games" onclick="setFilter('games',this)">Games</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-footer">
+      <div class="search-hints">
+        <div class="search-hint"><span class="kbd">&#x2191;</span><span class="kbd">&#x2193;</span> navigate</div>
+        <div class="search-hint"><span class="kbd">&#x21B5;</span> jump to</div>
+        <div class="search-hint"><span class="kbd">Esc</span> close</div>
+        <div class="search-hint"><span class="kbd">Ctrl+K</span> toggle</div>
+      </div>
+      <div class="search-count" id="searchCount">0 results</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ HERO ════ -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="grid-lines"></div>
+  <div style="position:relative">
+    <h1 class="hero-title">
+      <span class="line1">TERRAFORM QUEST</span>
+      <span class="line2">Zero → Production Expert · Gamified</span>
+    </h1>
+    <p class="hero-sub">Every concept visualised. Every idea turned into a game. Memory tricks for things that stick forever. No boring docs — just learning that actually works.</p>
+    <div class="hero-chips">
+      <span class="chip chip-neon">VISUAL LEARNING</span>
+      <span class="chip chip-green">MEMORY SCIENCE</span>
+      <span class="chip chip-orange">GAMIFIED</span>
+      <span class="chip chip-gold">PRODUCTION READY</span>
+    </div>
+    <button class="start-btn" onclick="startJourney()">INITIALISE LEARNING →</button>
+  </div>
+</div>
+
+<!-- ════ TOPIC TRACKER ════ -->
+<section>
+  <div class="container">
+    <div class="sec-label">Your Progress Map</div>
+    <h2 class="sec-title">All <span>Major Concepts</span> — Click to Mark Learned</h2>
+    <p class="sec-sub">Every topic covered below. Mark as learned and earn XP.</p>
+    <div class="topic-tracker" id="topicTracker">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════ SECTION 1: WHAT IS TERRAFORM ════ -->
+<section id="basics">
+  <div class="container">
+    <div class="sec-label">Level 1 · Foundations</div>
+    <h2 class="sec-title">What Is <span>Terraform?</span></h2>
+    <p class="sec-sub">Before writing a single line of code, understand the WHY — the mental model that makes everything else click.</p>
+
+    <div class="visual-story">
+      <div class="vs-visual">
+        <span class="big-emoji">🏗️</span>
+        <div style="font-family:var(--display);font-size:0.65rem;letter-spacing:0.1em;color:var(--neon2)">TERRAFORM = ARCHITECT</div>
+        <div style="font-size:0.78rem;color:var(--text2);margin-top:0.5rem">You write the blueprint.<br>Cloud is the construction crew.</div>
+      </div>
+      <div class="vs-text">
+        <h3>Infrastructure as Code (IaC)</h3>
+        <p>Terraform lets you describe your entire cloud infrastructure in text files — VMs, networks, databases, IAM — and then <em>creates, modifies, and deletes</em> that infrastructure automatically. No clicking in consoles. No manual steps. Everything is reproducible, version-controlled, and reviewable.</p>
+        <div class="memory-trick">
+          <p><strong>IaC = "I Always Commit"</strong><br>
+          <strong>I</strong>nfrastructure · <strong>A</strong>lways in code · <strong>C</strong>ommit to Git</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="analogy-box">
+      <div class="analogy-compare">
+        <div class="analogy-side">
+          <span class="analogy-emoji">📐</span>
+          <span class="analogy-label">Architect's Blueprint</span>
+          <span class="analogy-desc">Describes the building in detail. Static document.</span>
+        </div>
+        <div class="analogy-eq">=</div>
+        <div class="analogy-side">
+          <span class="analogy-emoji">📄</span>
+          <span class="analogy-label">Terraform .tf Files</span>
+          <span class="analogy-desc">Describes your infra in detail. Version-controlled code.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW TF WORKS DIAGRAM -->
+    <div class="diagram">
+      <div class="diagram-title">◈ How Terraform Works — The Engine</div>
+      <div class="tf-flow" style="flex-direction:column;gap:1rem">
+        <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center">
+          <div class="tf-node" onclick="showNodeInfo('tf-files')">
+            <span class="tf-node-icon">📝</span>
+            <div class="tf-node-name">.tf FILES</div>
+            <div class="tf-node-desc">desired state</div>
+          </div>
+          <div class="tf-arrow"></div>
+          <div class="tf-node" onclick="showNodeInfo('tf-core')" style="border-color:var(--neon);box-shadow:0 0 15px rgba(0,212,255,0.2)">
+            <span class="tf-node-icon">⚙️</span>
+            <div class="tf-node-name">TERRAFORM CORE</div>
+            <div class="tf-node-desc">plan → graph → apply</div>
+          </div>
+          <div class="tf-arrow"></div>
+          <div class="tf-node" onclick="showNodeInfo('tf-provider')">
+            <span class="tf-node-icon">🔌</span>
+            <div class="tf-node-name">PROVIDERS</div>
+            <div class="tf-node-desc">google/aws/azure</div>
+          </div>
+          <div class="tf-arrow"></div>
+          <div class="tf-node" onclick="showNodeInfo('tf-cloud')" style="border-color:var(--neon2)">
+            <span class="tf-node-icon">☁️</span>
+            <div class="tf-node-name">REAL INFRA</div>
+            <div class="tf-node-desc">GCP / AWS / Azure</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0;justify-content:center">
+          <div class="tf-node" onclick="showNodeInfo('tf-state')" style="border-color:var(--neon4)">
+            <span class="tf-node-icon">💾</span>
+            <div class="tf-node-name">STATE FILE</div>
+            <div class="tf-node-desc">last known reality</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0;margin:0 1rem">
+            <div style="font-size:0.7rem;color:var(--neon4);margin-bottom:0.2rem">reads ←→ writes</div>
+            <div style="height:2px;width:60px;background:linear-gradient(90deg,var(--neon4),var(--border2))"></div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text2);max-width:200px;text-align:center">Terraform compares desired (code) vs known (state) vs actual (cloud) → computes diff</div>
+        </div>
+      </div>
+      <div id="node-info" style="margin-top:1rem;padding:0.9rem;background:var(--bg3);border-radius:8px;font-size:0.82rem;color:var(--neon2);display:none;text-align:center"></div>
+    </div>
+
+    <div class="info-box">Terraform is <strong>declarative</strong> — you describe the END STATE, not the steps. It's like telling your GPS "take me to Mumbai" not "turn left on MG Road, then right on..."</div>
+  </div>
+</section>
+
+<!-- ════ HCL SYNTAX ════ -->
+<section id="hcl">
+  <div class="container">
+    <div class="sec-label">Level 1 · HCL Language</div>
+    <h2 class="sec-title">HCL Syntax — <span>The Blueprint Grammar</span></h2>
+
+    <div class="tab-group">
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('hcl','resource')">resource</button>
+        <button class="tab-btn" onclick="switchTab('hcl','data')">data</button>
+        <button class="tab-btn" onclick="switchTab('hcl','variable')">variable</button>
+        <button class="tab-btn" onclick="switchTab('hcl','output')">output</button>
+        <button class="tab-btn" onclick="switchTab('hcl','locals')">locals</button>
+        <button class="tab-btn" onclick="switchTab('hcl','provider')">provider</button>
+      </div>
+      <div class="tab-pane active" id="hcl-resource">
+        <div class="analogy-box" style="margin-bottom:1rem">
+          <div class="analogy-compare">
+            <div class="analogy-side"><span class="analogy-emoji">📦</span><span class="analogy-label">Product Spec Sheet</span><span class="analogy-desc">Category → Model → SKU → Specs</span></div>
+            <div class="analogy-eq">=</div>
+            <div class="analogy-side"><span class="analogy-emoji">🔷</span><span class="analogy-label">resource block</span><span class="analogy-desc">block_type → resource_type → local_name → body</span></div>
+          </div>
+        </div>
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">RESOURCE BLOCK ANATOMY</div></div>
+          <div class="code-body"><span class="cmt"># BLOCK_TYPE  RESOURCE_TYPE                  LOCAL_NAME</span>
+<span class="kw">resource</span>     <span class="val">"google_compute_instance"</span>   <span class="val">"web_server"</span>  {
+<span class="hl">
+  <span class="key">name</span>         = <span class="str">"my-vm"</span>              <span class="cmt"># ← string literal</span>
+  <span class="key">machine_type</span> = <span class="str">var.machine_type</span>    <span class="cmt"># ← variable reference</span>
+  <span class="key">zone</span>         = <span class="str">"asia-south1-a"</span>
+</span>
+  <span class="key">boot_disk</span> {                          <span class="cmt"># ← nested block</span>
+    <span class="key">initialize_params</span> {
+      <span class="key">image</span> = <span class="str">"debian-cloud/debian-11"</span>
+    }
+  }
+
+  <span class="key">network_interface</span> {
+    <span class="key">network</span> = <span class="str">"default"</span>
+  }
+}
+
+<span class="cmt"># Reference: resource_type.local_name.attribute</span>
+<span class="cmt"># Like: TYPE . NAME . ATTR  (filing cabinet model)</span>
+<span class="fn">google_compute_instance</span>.<span class="val">web_server</span>.<span class="key">network_interface</span>[<span class="num">0</span>].<span class="key">network_ip</span></div>
+        </div>
+        <div class="memory-trick">
+          <p><strong>The Filing Cabinet model:</strong></p>
+          <ul>
+            <li>🗂️ Drawer = resource type (<code style="color:var(--neon2)">google_compute_instance</code>)</li>
+            <li>📁 Folder = local name (<code style="color:var(--neon2)">web_server</code>)</li>
+            <li>📄 Document = attribute (<code style="color:var(--neon2)">network_ip</code>)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tab-pane" id="hcl-data">
+        <div class="analogy-box">
+          <div class="analogy-compare">
+            <div class="analogy-side"><span class="analogy-emoji">🔭</span><span class="analogy-label">Telescope</span><span class="analogy-desc">Observes the star. Doesn't create it.</span></div>
+            <div class="analogy-eq">=</div>
+            <div class="analogy-side"><span class="analogy-emoji">📊</span><span class="analogy-label">data block</span><span class="analogy-desc">Reads existing infra. Never creates.</span></div>
+          </div>
+        </div>
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">DATA SOURCE — READ-ONLY LOOKUP</div></div>
+          <div class="code-body"><span class="cmt"># data = "read existing cloud resource" (no creation!)</span>
+<span class="kw">data</span> <span class="val">"google_compute_image"</span> <span class="val">"debian"</span> {
+  <span class="key">family</span>  = <span class="str">"debian-11"</span>
+  <span class="key">project</span> = <span class="str">"debian-cloud"</span>
+}
+
+<span class="cmt"># Use it in a resource — always prefix with "data."</span>
+<span class="kw">resource</span> <span class="val">"google_compute_instance"</span> <span class="val">"vm"</span> {
+  <span class="key">boot_disk</span> {
+    <span class="key">initialize_params</span> {
+      <span class="key">image</span> = <span class="fn">data</span>.<span class="val">google_compute_image</span>.<span class="val">debian</span>.<span class="key">self_link</span>
+    }
+  }
+}
+
+<span class="cmt"># Other useful data sources:</span>
+<span class="kw">data</span> <span class="val">"google_project"</span> <span class="val">"current"</span> {}
+<span class="kw">data</span> <span class="val">"google_secret_manager_secret_version"</span> <span class="val">"db_pass"</span> {
+  <span class="key">secret</span> = <span class="str">"projects/p/secrets/db-password"</span>
+}</div>
+        </div>
+      </div>
+      <div class="tab-pane" id="hcl-variable">
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">VARIABLES — SETTINGS PANEL</div></div>
+          <div class="code-body"><span class="kw">variable</span> <span class="val">"env"</span> {
+  <span class="key">description</span> = <span class="str">"Environment: dev, staging, prod"</span>
+  <span class="key">type</span>        = <span class="fn">string</span>
+  <span class="key">default</span>     = <span class="str">"dev"</span>
+  <span class="key">validation</span> {
+    <span class="key">condition</span>     = <span class="fn">contains</span>([<span class="str">"dev"</span>,<span class="str">"staging"</span>,<span class="str">"prod"</span>], <span class="str">var.env</span>)
+    <span class="key">error_message</span> = <span class="str">"Must be dev, staging, or prod"</span>
+  }
+}
+
+<span class="cmt"># Variable types: string, number, bool, list(), map(), object(), any</span>
+<span class="kw">variable</span> <span class="val">"node_count"</span> { <span class="key">type</span> = <span class="fn">number</span>; <span class="key">default</span> = <span class="num">3</span> }
+<span class="kw">variable</span> <span class="val">"tags"</span>       { <span class="key">type</span> = <span class="fn">list</span>(<span class="fn">string</span>); <span class="key">default</span> = [] }
+
+<span class="cmt"># Priority (highest → lowest):  CLI → .tfvars → TF_VAR_* → default</span>
+<span class="cmt"># Memory trick: "CLI Vars Teach Defaults" (C→V→T→D)</span>
+
+<span class="cmt"># Pass at CLI: terraform apply -var="env=prod"</span>
+<span class="cmt"># .tfvars:     env = "prod"  (in prod.tfvars)</span>
+<span class="cmt"># Env var:     export TF_VAR_env=prod</span></div>
+        </div>
+      </div>
+      <div class="tab-pane" id="hcl-output">
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">OUTPUTS — MODULE RETURN VALUES</div></div>
+          <div class="code-body"><span class="kw">output</span> <span class="val">"cluster_endpoint"</span> {
+  <span class="key">description</span> = <span class="str">"GKE API endpoint"</span>
+  <span class="key">value</span>       = google_container_cluster.main.endpoint
+  <span class="key">sensitive</span>   = <span class="fn">true</span>   <span class="cmt"># hides in terminal (NOT in state!)</span>
+}
+
+<span class="kw">output</span> <span class="val">"all_vm_ips"</span> {
+  <span class="key">value</span> = { <span class="kw">for</span> k, v <span class="kw">in</span> google_compute_instance.vms :
+              k => v.network_interface[<span class="num">0</span>].network_ip }
+}
+
+<span class="cmt"># Consume: terraform output cluster_endpoint</span>
+<span class="cmt"># In JSON: terraform output -json</span>
+<span class="cmt"># From module: module.gke.cluster_endpoint</span></div>
+        </div>
+        <div class="warn-box">sensitive=true only hides value from CLI/logs. The value is still PLAIN TEXT in the state file. Always encrypt the state bucket.</div>
+      </div>
+      <div class="tab-pane" id="hcl-locals">
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">LOCALS — COMPUTED INTERNAL VALUES</div></div>
+          <div class="code-body"><span class="cmt"># locals = private computed values (DRY principle)</span>
+<span class="kw">locals</span> {
+  <span class="key">is_prod</span>      = <span class="str">var.env</span> == <span class="str">"prod"</span>
+  <span class="key">name_prefix</span>  = <span class="str">"${var.env}-${var.project_name}"</span>
+  <span class="key">machine_size</span> = <span class="kw">local</span>.is_prod ? <span class="str">"e2-standard-4"</span> : <span class="str">"e2-small"</span>
+  <span class="key">common_labels</span> = {
+    <span class="key">env</span>        = <span class="str">var.env</span>
+    <span class="key">managed_by</span> = <span class="str">"terraform"</span>
+    <span class="key">team</span>       = <span class="str">"platform"</span>
+  }
+}
+
+<span class="cmt"># Access: local.name_prefix  (note: "local" singular)</span>
+<span class="kw">resource</span> <span class="val">"google_compute_instance"</span> <span class="val">"vm"</span> {
+  <span class="key">name</span>         = <span class="str">"${local.name_prefix}-vm"</span>
+  <span class="key">machine_type</span> = <span class="kw">local</span>.machine_size
+  <span class="key">labels</span>       = <span class="kw">local</span>.common_labels
+}</div>
+        </div>
+      </div>
+      <div class="tab-pane" id="hcl-provider">
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">PROVIDER — CLOUD VENDOR PLUGIN</div></div>
+          <div class="code-body"><span class="kw">terraform</span> {
+  <span class="key">required_providers</span> {
+    <span class="key">google</span> = {
+      <span class="key">source</span>  = <span class="str">"hashicorp/google"</span>
+      <span class="key">version</span> = <span class="str">"~> 5.0"</span>   <span class="cmt"># ~> means 5.x (pessimistic constraint)</span>
+    }
+  }
+  <span class="key">required_version</span> = <span class="str">">= 1.5.0"</span>
+}
+
+<span class="kw">provider</span> <span class="val">"google"</span> {
+  <span class="key">project</span> = <span class="str">var.project_id</span>
+  <span class="key">region</span>  = <span class="str">"asia-south1"</span>
+}
+
+<span class="cmt"># Multiple provider configurations (aliases)</span>
+<span class="kw">provider</span> <span class="val">"google"</span> {
+  <span class="key">alias</span>   = <span class="str">"us"</span>
+  <span class="key">project</span> = <span class="str">var.project_id</span>
+  <span class="key">region</span>  = <span class="str">"us-central1"</span>
+}
+<span class="cmt"># Use: provider = google.us  inside resource block</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ COMMANDS ════ -->
+<section id="commands">
+  <div class="container">
+    <div class="sec-label">Level 1 · Core Commands</div>
+    <h2 class="sec-title">The <span>Sacred Commands</span></h2>
+
+    <div class="story-box">
+      <p>A chef has 3 sacred rituals before every service: <em>mise en place</em> (set up the kitchen), <em>taste test</em> (check the recipe), <em>plate and serve</em> (execute). Terraform has the same ritual: <em>init</em> sets up the kitchen, <em>plan</em> is the taste test, <em>apply</em> plates the dish. Skip any step and serve disasters.</p>
+    </div>
+
+    <div class="memory-trick">
+      <p><strong>Mnemonic: "I Plan to Apply"</strong> → <strong>I</strong>nit → <strong>P</strong>lan → <strong>A</strong>pply. Always in this order. Never skip plan. The chef who skips tasting serves disasters.</p>
+    </div>
+
+    <!-- Pipeline visualisation -->
+    <div class="pipeline" id="commandPipeline">
+      <div class="pipeline-stage" onclick="showStage(0)">
+        <span class="ps-icon">🏗️</span>
+        <div class="ps-name">INIT</div>
+        <div class="ps-detail">Download providers</div>
+      </div>
+      <div class="pipeline-stage" onclick="showStage(1)">
+        <span class="ps-icon">✅</span>
+        <div class="ps-name">VALIDATE</div>
+        <div class="ps-detail">Check syntax</div>
+      </div>
+      <div class="pipeline-stage" onclick="showStage(2)">
+        <span class="ps-icon">✨</span>
+        <div class="ps-name">FMT</div>
+        <div class="ps-detail">Format code</div>
+      </div>
+      <div class="pipeline-stage" onclick="showStage(3)">
+        <span class="ps-icon">🔍</span>
+        <div class="ps-name">PLAN</div>
+        <div class="ps-detail">Show changes</div>
+      </div>
+      <div class="pipeline-stage" onclick="showStage(4)">
+        <span class="ps-icon">🚀</span>
+        <div class="ps-name">APPLY</div>
+        <div class="ps-detail">Create infra</div>
+      </div>
+      <div class="pipeline-stage" onclick="showStage(5)">
+        <span class="ps-icon">💣</span>
+        <div class="ps-name">DESTROY</div>
+        <div class="ps-detail">Tear down</div>
+      </div>
+    </div>
+    <div class="pipeline-info" id="stageInfo0">
+      <strong>terraform init</strong> — Downloads providers into .terraform/, creates .terraform.lock.hcl, connects to the backend. Like <code>npm install</code>. Run once per project and after adding new providers or modules.
+    </div>
+    <div class="pipeline-info" id="stageInfo1">
+      <strong>terraform validate</strong> — Checks syntax and internal consistency without making any API calls. Zero side effects. Run as your first CI check. Catches typos, missing required fields, wrong types.
+    </div>
+    <div class="pipeline-info" id="stageInfo2">
+      <strong>terraform fmt</strong> — Auto-formats .tf files to canonical style (consistent indentation, alignment). Run <code>terraform fmt -check -recursive</code> in CI as a blocking PR gate.
+    </div>
+    <div class="pipeline-info" id="stageInfo3">
+      <strong>terraform plan</strong> — The most important command. Queries cloud APIs, reads state, computes the diff. Shows + create / ~ update / - destroy. <strong>Always read this output before applying.</strong> Save with <code>-out=tfplan</code> for reproducible applies.
+    </div>
+    <div class="pipeline-info" id="stageInfo4">
+      <strong>terraform apply</strong> — Executes the plan. Creates/updates/destroys real cloud resources. Prompts for confirmation unless <code>-auto-approve</code>. Updates state file after every change. In CI/CD, apply only on merge to main.
+    </div>
+    <div class="pipeline-info" id="stageInfo5">
+      <strong>terraform destroy</strong> — Removes ALL resources managed by this config. Plan first with <code>terraform plan -destroy</code>. Use <code>lifecycle.prevent_destroy = true</code> on databases and state buckets to guard against accidents.
+    </div>
+
+    <div class="cmd-grid">
+      <div class="cmd-card" onclick="earnXP(10,'Command learned!')">
+        <span class="cmd-emoji">📋</span>
+        <code class="cmd-code">terraform state list</code>
+        <div class="cmd-desc">List all resources in state</div>
+        <div class="cmd-trick">Like reading your inventory ledger</div>
+      </div>
+      <div class="cmd-card" onclick="earnXP(10,'Command learned!')">
+        <span class="cmd-emoji">🔎</span>
+        <code class="cmd-code">terraform state show</code>
+        <div class="cmd-desc">Inspect one resource in detail</div>
+        <div class="cmd-trick">Open a specific folder in the filing cabinet</div>
+      </div>
+      <div class="cmd-card" onclick="earnXP(10,'Command learned!')">
+        <span class="cmd-emoji">🚛</span>
+        <code class="cmd-code">terraform state mv</code>
+        <div class="cmd-desc">Rename resource in state</div>
+        <div class="cmd-trick">Rename a file without deleting it</div>
+      </div>
+      <div class="cmd-card" onclick="earnXP(10,'Command learned!')">
+        <span class="cmd-emoji">📦</span>
+        <code class="cmd-code">terraform import</code>
+        <div class="cmd-desc">Adopt existing cloud resource</div>
+        <div class="cmd-trick">Register pre-existing stock in your inventory</div>
+      </div>
+      <div class="cmd-card" onclick="earnXP(10,'Command learned!')">
+        <span class="cmd-emoji">🔓</span>
+        <code class="cmd-code">terraform force-unlock</code>
+        <div class="cmd-desc">Release stuck state lock</div>
+        <div class="cmd-trick">Break the glass on the key case after a crash</div>
+      </div>
+      <div class="cmd-card" onclick="earnXP(10,'Command learned!')">
+        <span class="cmd-emoji">🔄</span>
+        <code class="cmd-code">terraform refresh</code>
+        <div class="cmd-desc">Sync state with real cloud (drift detection)</div>
+        <div class="cmd-trick">Update the ledger after a stocktake</div>
+      </div>
+      <div class="cmd-card" onclick="earnXP(10,'Command learned!')">
+        <span class="cmd-emoji">🌿</span>
+        <code class="cmd-code">terraform workspace</code>
+        <div class="cmd-desc">Manage isolated state environments</div>
+        <div class="cmd-trick">Switch browser profiles (work vs personal)</div>
+      </div>
+      <div class="cmd-card" onclick="earnXP(10,'Command learned!')">
+        <span class="cmd-emoji">📊</span>
+        <code class="cmd-code">terraform graph</code>
+        <div class="cmd-desc">Output dependency graph in DOT format</div>
+        <div class="cmd-trick">Print the org chart of your infra</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════ STATE ════ -->
+<section id="state">
+  <div class="container">
+    <div class="sec-label">Level 2 · State</div>
+    <h2 class="sec-title">Terraform <span>State</span> — The Memory</h2>
+
+    <div class="visual-story">
+      <div class="vs-visual">
+        <span class="big-emoji">📚</span>
+        <div style="font-family:var(--display);font-size:0.65rem;letter-spacing:0.1em;color:var(--neon4)">STATE = LIBRARIAN'S LEDGER</div>
+      </div>
+      <div class="vs-text">
+        <h3>Why State Exists</h3>
+        <p>Without state, Terraform would have to query every cloud resource on every run — slow and unreliable. State is the cached map of reality. Terraform compares your desired state (code) against known state (file) to compute the minimum diff. It also stores cloud-returned values (IPs, IDs) that you can't know until after creation.</p>
+      </div>
+    </div>
+
+    <div class="analogy-box">
+      <div class="analogy-compare">
+        <div class="analogy-side"><span class="analogy-emoji">📦</span><span class="analogy-label">Purchase Orders</span><span class="analogy-desc">What you ordered (desired)</span></div>
+        <div class="analogy-eq">≠</div>
+        <div class="analogy-side"><span class="analogy-emoji">📋</span><span class="analogy-label">Inventory Ledger</span><span class="analogy-desc">What's actually on the shelf (state)</span></div>
+      </div>
+      <p style="font-size:0.8rem;color:var(--text2);margin-top:1rem;text-align:center">Terraform computes the DIFFERENCE between the two → only makes the minimum changes needed</p>
+    </div>
+
+    <div class="code-lab">
+      <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">terraform.tfstate — What's Inside</div></div>
+      <div class="code-body">{
+  <span class="key">"version"</span>:          <span class="num">4</span>,          <span class="cmt">// state format version</span>
+  <span class="key">"terraform_version"</span>: <span class="str">"1.7.0"</span>,
+  <span class="key">"serial"</span>:            <span class="num">12</span>,         <span class="cmt">// increments on every apply</span>
+  <span class="key">"lineage"</span>:           <span class="str">"a3f2-9d1c..."</span>, <span class="cmt">// UUID — permanent identity</span>
+  <span class="key">"outputs"</span>: { ... },
+  <span class="key">"resources"</span>: [{
+    <span class="key">"type"</span>: <span class="str">"google_compute_instance"</span>,
+    <span class="key">"name"</span>: <span class="str">"web_server"</span>,
+    <span class="key">"instances"</span>: [{
+      <span class="key">"attributes"</span>: {
+        <span class="key">"id"</span>:           <span class="str">"projects/.../instances/web"</span>,
+        <span class="key">"machine_type"</span>: <span class="str">"e2-medium"</span>,
+        <span class="key">"network_ip"</span>:   <span class="str">"10.0.0.5"</span>
+        <span class="cmt">// ALL cloud-returned attributes stored here</span>
+      }
+    }]
+  }]
+}</div>
+    </div>
+
+    <div class="code-lab">
+      <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">backend.tf — Remote State on GCS (Production Required)</div></div>
+      <div class="code-body"><span class="kw">terraform</span> {
+  <span class="key">backend</span> <span class="val">"gcs"</span> {
+    <span class="key">bucket</span>         = <span class="str">"my-org-tf-state-prod"</span>
+    <span class="key">prefix</span>         = <span class="str">"infra/gke-cluster"</span>
+    <span class="key">encryption_key</span> = <span class="str">var.kms_key_id</span>   <span class="cmt">// CMEK</span>
+  }
+}
+<span class="cmt">
+# State locking: GCS creates .tflock object atomically
+# if-generation-match:0 prevents two concurrent writes
+# No DynamoDB needed — GCS handles it natively!
+
+# Migrate local → GCS: terraform init -migrate-state
+# Env-specific: terraform init -backend-config=prod.tfbackend
+</span></div>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">◈ State Locking — Two Engineers Fight Over State</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1rem">
+        <div style="background:rgba(255,45,120,0.05);border:1px solid rgba(255,45,120,0.3);border-radius:10px;padding:1.25rem">
+          <div style="font-family:var(--display);font-size:0.65rem;letter-spacing:0.15em;color:var(--neon6);margin-bottom:0.75rem">❌ WITHOUT LOCKING</div>
+          <div style="font-size:0.82rem;color:var(--text2);line-height:1.7">
+            Amir runs apply → reads state v12<br>
+            Priya runs apply → reads state v12<br>
+            Amir writes state v13 ✓<br>
+            Priya writes state v13 — <span style="color:var(--neon6)">OVERWRITES AMIR!</span><br>
+            <strong style="color:var(--neon6)">State v13 = corrupted. Infra broken.</strong>
+          </div>
+        </div>
+        <div style="background:rgba(0,255,157,0.05);border:1px solid rgba(0,255,157,0.3);border-radius:10px;padding:1.25rem">
+          <div style="font-family:var(--display);font-size:0.65rem;letter-spacing:0.15em;color:var(--neon2);margin-bottom:0.75rem">✅ WITH GCS LOCKING</div>
+          <div style="font-size:0.82rem;color:var(--text2);line-height:1.7">
+            Amir runs apply → <span style="color:var(--neon2)">🔒 LOCK acquired</span><br>
+            Priya runs apply → <span style="color:var(--neon6)">BLOCKED — lock held</span><br>
+            Amir completes → <span style="color:var(--neon2)">🔓 LOCK released</span><br>
+            Priya's turn → reads fresh state<br>
+            <strong style="color:var(--neon2)">State consistent. Everyone safe.</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn-box">NEVER commit .tfstate to git. Add *.tfstate and *.tfstate.backup to .gitignore. State contains secrets in plain text.</div>
+    <div class="pro-box">Enable GCS object versioning on your state bucket — gives you a time machine. terraform force-unlock LOCK_ID when an apply crashes mid-run.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════ MODULES ════ -->
+<section id="modules">
+  <div class="container">
+    <div class="sec-label">Level 2 · Modules</div>
+    <h2 class="sec-title">Modules — <span>LEGO Kits</span> for Infrastructure</h2>
+
+    <div class="analogy-box">
+      <div class="analogy-compare">
+        <div class="analogy-side"><span class="analogy-emoji">🧱</span><span class="analogy-label">LEGO Kit</span><span class="analogy-desc">Sealed box. Inputs: bricks. Outputs: a spaceship. You don't see the inside mechanism.</span></div>
+        <div class="analogy-eq">=</div>
+        <div class="analogy-side"><span class="analogy-emoji">📦</span><span class="analogy-label">Terraform Module</span><span class="analogy-desc">Folder of .tf files. Inputs: variables. Outputs: resource IDs/IPs. Hidden implementation.</span></div>
+      </div>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">◈ Module Interface — Black Box</div>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center;margin-top:1rem">
+        <div style="background:var(--bg3);border-radius:10px;padding:1rem;border:1px solid var(--border)">
+          <div style="font-family:var(--display);font-size:0.6rem;letter-spacing:0.1em;color:var(--neon4);margin-bottom:0.5rem">INPUTS (variables)</div>
+          <div style="font-family:var(--mono);font-size:0.72rem;color:var(--text2);line-height:1.7">project_id<br>network_name<br>region<br>subnets {…}</div>
+        </div>
+        <div style="text-align:center;padding:0 1rem">
+          <div style="font-size:3rem;line-height:1">📦</div>
+          <div style="font-family:var(--display);font-size:0.55rem;letter-spacing:0.1em;color:var(--neon);margin-top:0.3rem">MODULE</div>
+          <div style="font-size:0.7rem;color:var(--text2);margin-top:0.3rem">main.tf inside</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:10px;padding:1rem;border:1px solid var(--border)">
+          <div style="font-family:var(--display);font-size:0.6rem;letter-spacing:0.1em;color:var(--neon2);margin-bottom:0.5rem">OUTPUTS</div>
+          <div style="font-family:var(--mono);font-size:0.72rem;color:var(--text2);line-height:1.7">network_id<br>subnet_ids<br>router_name</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-lab">
+      <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">Complete Module Pattern</div></div>
+      <div class="code-body"><span class="cmt"># modules/vpc/variables.tf — the module's API</span>
+<span class="kw">variable</span> <span class="val">"network_name"</span> { <span class="key">type</span> = <span class="fn">string</span> }
+<span class="kw">variable</span> <span class="val">"subnets"</span>      { <span class="key">type</span> = <span class="fn">map</span>(<span class="fn">object</span>({ <span class="key">cidr</span> = <span class="fn">string</span> })) }
+
+<span class="cmt"># modules/vpc/main.tf</span>
+<span class="kw">resource</span> <span class="val">"google_compute_network"</span> <span class="val">"vpc"</span> {
+  <span class="key">name</span>                    = <span class="str">var.network_name</span>
+  <span class="key">auto_create_subnetworks</span> = <span class="fn">false</span>
+}
+<span class="kw">resource</span> <span class="val">"google_compute_subnetwork"</span> <span class="val">"subnets"</span> {
+  <span class="key">for_each</span>      = <span class="str">var.subnets</span>
+  <span class="key">name</span>          = <span class="str">"${var.network_name}-${each.key}"</span>
+  <span class="key">network</span>       = google_compute_network.vpc.id
+  <span class="key">ip_cidr_range</span> = <span class="str">each.value.cidr</span>
+}
+
+<span class="cmt"># modules/vpc/outputs.tf</span>
+<span class="kw">output</span> <span class="val">"network_id"</span> { <span class="key">value</span> = google_compute_network.vpc.id }
+<span class="kw">output</span> <span class="val">"subnet_ids"</span> {
+  <span class="key">value</span> = { <span class="kw">for</span> k, v <span class="kw">in</span> google_compute_subnetwork.subnets : k => v.id }
+}
+
+<span class="cmt"># root/main.tf — calling the module</span>
+<span class="kw">module</span> <span class="val">"network"</span> {
+  <span class="key">source</span>       = <span class="str">"./modules/vpc"</span>      <span class="cmt"># local path</span>
+  <span class="key">network_name</span> = <span class="str">"prod-vpc"</span>
+  <span class="key">subnets</span> = {
+    <span class="str">"app"</span>  = { <span class="key">cidr</span> = <span class="str">"10.0.1.0/24"</span> }
+    <span class="str">"data"</span> = { <span class="key">cidr</span> = <span class="str">"10.0.2.0/24"</span> }
+  }
+}
+<span class="kw">module</span> <span class="val">"gke"</span> {
+  <span class="key">source</span>     = <span class="str">"./modules/gke"</span>
+  <span class="key">network_id</span> = <span class="str">module.network.network_id</span>  <span class="cmt">← output → input</span>
+}</div>
+    </div>
+
+    <div class="memory-trick">
+      <p><strong>Module source types (3 options):</strong></p>
+      <ul>
+        <li>📁 <strong>Local:</strong> <code style="color:var(--neon2)">source = "./modules/vpc"</code></li>
+        <li>🌐 <strong>Registry:</strong> <code style="color:var(--neon2)">source = "terraform-google-modules/network/google"</code></li>
+        <li>🔗 <strong>Git:</strong> <code style="color:var(--neon2)">source = "git::https://github.com/org/repo.git//modules/vpc?ref=v1.0"</code></li>
+      </ul>
+      <p style="margin-top:0.5rem"><strong>Rules:</strong> Never put backend {} inside a module. Never put provider {} inside a module. ALWAYS pin registry modules with version = "~> X.0"</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════ LOOPS — for_each & count ════ -->
+<section id="loops">
+  <div class="container">
+    <div class="sec-label">Level 2 · Dynamic Resources</div>
+    <h2 class="sec-title">count vs <span>for_each</span> — Clone Army vs Named Squad</h2>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1.5rem 0">
+      <div style="background:rgba(255,45,120,0.06);border:1px solid rgba(255,45,120,0.3);border-radius:10px;padding:1.25rem">
+        <div style="font-family:var(--display);font-size:0.65rem;letter-spacing:0.1em;color:var(--neon6);margin-bottom:0.75rem">⚠️ count = CLONE ARMY</div>
+        <div style="font-size:0.82rem;color:var(--text2);line-height:1.7">
+          Soldiers: [0], [1], [2]<br>
+          Remove [1] → [2] becomes [1]<br>
+          Terraform sees CHANGE → may destroy and recreate [1]<br>
+          <span style="color:var(--neon6)">Index shift = unexpected destruction!</span>
+        </div>
+        <div style="margin-top:0.75rem;display:flex;gap:0.4rem">
+          <div style="background:var(--bg3);border:1px solid var(--neon6);border-radius:4px;padding:0.3rem 0.6rem;font-family:var(--mono);font-size:0.7rem;color:var(--neon6)">[0]</div>
+          <div style="background:var(--bg3);border:2px dashed var(--neon6);border-radius:4px;padding:0.3rem 0.6rem;font-family:var(--mono);font-size:0.7rem;color:var(--neon6)">[1] 💥</div>
+          <div style="background:var(--bg3);border:1px solid rgba(255,45,120,0.5);border-radius:4px;padding:0.3rem 0.6rem;font-family:var(--mono);font-size:0.7rem;color:var(--text2)">[2]→[1] ?</div>
+        </div>
+      </div>
+      <div style="background:rgba(0,255,157,0.05);border:1px solid rgba(0,255,157,0.3);border-radius:10px;padding:1.25rem">
+        <div style="font-family:var(--display);font-size:0.65rem;letter-spacing:0.1em;color:var(--neon2);margin-bottom:0.75rem">✅ for_each = NAMED SQUAD</div>
+        <div style="font-size:0.82rem;color:var(--text2);line-height:1.7">
+          Soldiers: ["alpha"], ["bravo"], ["charlie"]<br>
+          Remove "bravo" → alpha and charlie unchanged<br>
+          Their names never change<br>
+          <span style="color:var(--neon2)">Keys are stable identities!</span>
+        </div>
+        <div style="margin-top:0.75rem;display:flex;gap:0.4rem">
+          <div style="background:var(--bg3);border:1px solid var(--neon2);border-radius:4px;padding:0.3rem 0.6rem;font-family:var(--mono);font-size:0.7rem;color:var(--neon2)">alpha ✓</div>
+          <div style="background:var(--bg3);border:2px dashed rgba(255,45,120,0.5);border-radius:4px;padding:0.3rem 0.6rem;font-family:var(--mono);font-size:0.7rem;color:var(--neon6)">bravo ✗</div>
+          <div style="background:var(--bg3);border:1px solid var(--neon2);border-radius:4px;padding:0.3rem 0.6rem;font-family:var(--mono);font-size:0.7rem;color:var(--neon2)">charlie ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-lab">
+      <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">All Loop Patterns</div></div>
+      <div class="code-body"><span class="cmt"># ── count: N identical copies ─────────────────────────────</span>
+<span class="kw">resource</span> <span class="val">"google_compute_instance"</span> <span class="val">"web"</span> {
+  <span class="key">count</span>        = <span class="num">3</span>
+  <span class="key">name</span>         = <span class="str">"web-${count.index}"</span>   <span class="cmt"># web-0, web-1, web-2</span>
+}
+<span class="cmt"># State: google_compute_instance.web[0], web[1], web[2]</span>
+
+<span class="cmt"># ── count: conditional resource ──────────────────────────</span>
+<span class="kw">resource</span> <span class="val">"google_compute_instance"</span> <span class="val">"bastion"</span> {
+  <span class="key">count</span> = <span class="str">var.enable_bastion ? </span><span class="num">1</span> <span class="str">: </span><span class="num">0</span>   <span class="cmt"># exists or doesn't</span>
+}
+
+<span class="cmt"># ── for_each: set of strings ──────────────────────────────</span>
+<span class="kw">resource</span> <span class="val">"google_storage_bucket"</span> <span class="val">"buckets"</span> {
+  <span class="key">for_each</span> = <span class="fn">toset</span>([<span class="str">"logs"</span>, <span class="str">"assets"</span>, <span class="str">"backups"</span>])
+  <span class="key">name</span>     = <span class="str">"my-org-${each.key}"</span>
+}
+<span class="cmt"># State: google_storage_bucket.buckets["logs"] etc.</span>
+
+<span class="cmt"># ── for_each: map of objects (most powerful) ─────────────</span>
+<span class="kw">resource</span> <span class="val">"google_container_node_pool"</span> <span class="val">"pools"</span> {
+  <span class="key">for_each</span> = {
+    <span class="str">"general"</span> = { <span class="key">machine_type</span>=<span class="str">"e2-standard-4"</span>, <span class="key">min</span>=<span class="num">1</span>, <span class="key">max</span>=<span class="num">5</span>  }
+    <span class="str">"spot"</span>    = { <span class="key">machine_type</span>=<span class="str">"e2-standard-8"</span>, <span class="key">min</span>=<span class="num">0</span>, <span class="key">max</span>=<span class="num">10</span> }
+  }
+  <span class="key">name</span>         = <span class="str">each.key</span>
+  <span class="key">machine_type</span> = <span class="str">each.value.machine_type</span>
+}
+
+<span class="cmt"># ── dynamic block: for_each INSIDE resource ──────────────</span>
+<span class="kw">resource</span> <span class="val">"google_compute_firewall"</span> <span class="val">"web"</span> {
+  <span class="kw">dynamic</span> <span class="val">"allow"</span> {
+    <span class="key">for_each</span> = [<span class="num">80</span>, <span class="num">443</span>, <span class="num">8080</span>]
+    <span class="key">content</span> {
+      <span class="key">protocol</span> = <span class="str">"tcp"</span>
+      <span class="key">ports</span>    = [<span class="fn">tostring</span>(<span class="str">allow.value</span>)]
+    }
+  }
+}
+
+<span class="cmt"># ── for expression: transform collections ─────────────────</span>
+<span class="kw">locals</span> {
+  <span class="key">subnet_map</span> = { <span class="kw">for</span> s <span class="kw">in</span> var.subnets : s.name => s.cidr }
+  <span class="key">prod_pools</span> = { <span class="kw">for</span> k,v <span class="kw">in</span> var.pools : k => v <span class="kw">if</span> !v.spot }
+}
+
+<span class="cmt"># ── flatten + for: cross-product (SA × role pairs) ────────</span>
+<span class="kw">locals</span> {
+  <span class="key">sa_roles</span> = { <span class="kw">for</span> p <span class="kw">in</span> <span class="fn">flatten</span>([
+    <span class="kw">for</span> sa <span class="kw">in</span> var.sas : [<span class="kw">for</span> r <span class="kw">in</span> var.roles : {key=<span class="str">"${sa}-${r}"</span>,sa=sa,role=r}]
+  ]) : p.key => p }
+}</div>
+    </div>
+
+    <div class="memory-trick">
+      <p><strong>Golden Rule: default to for_each.</strong> Use count ONLY for: (a) N identical clones, (b) conditional 0/1.</p>
+      <p style="margin-top:0.5rem"><strong>Pitfalls:</strong></p>
+      <ul>
+        <li>for_each needs a <strong>set or map</strong>, not a list → wrap with <code style="color:var(--neon2)">toset()</code></li>
+        <li>Keys must be <strong>known at plan time</strong> — can't use auto-generated IDs</li>
+        <li>Can't use BOTH count and for_each on same resource</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════ LIFECYCLE ════ -->
+<section id="lifecycle">
+  <div class="container">
+    <div class="sec-label">Level 3 · Lifecycle</div>
+    <h2 class="sec-title">Lifecycle — <span>Control Resource Behaviour</span></h2>
+
+    <div class="code-lab">
+      <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">All lifecycle options</div></div>
+      <div class="code-body"><span class="kw">resource</span> <span class="val">"google_sql_database_instance"</span> <span class="val">"db"</span> {
+  <span class="key">lifecycle</span> {
+
+    <span class="key">prevent_destroy</span> = <span class="fn">true</span>
+    <span class="cmt">    # ↑ terraform destroy FAILS if this is true</span>
+    <span class="cmt">    # Use on: databases, state buckets, prod clusters</span>
+
+    <span class="key">create_before_destroy</span> = <span class="fn">true</span>
+    <span class="cmt">    # ↑ when forced replace: create new FIRST, then destroy old</span>
+    <span class="cmt">    # Zero-downtime replacements</span>
+
+    <span class="key">ignore_changes</span> = [<span class="str">settings[0].disk_size</span>]
+    <span class="cmt">    # ↑ ignore drift on this attribute (GCP auto-grows disk)</span>
+    <span class="cmt">    # Use sparingly — can hide real problems</span>
+
+    <span class="key">replace_triggered_by</span> = [<span class="str">google_compute_image.new</span>]
+    <span class="cmt">    # ↑ force replace THIS resource when another changes</span>
+  }
+}</div>
+    </div>
+
+    <div class="info-box">prevent_destroy is your safety net for production databases. But note: <code>terraform destroy</code> on the MODULE containing the resource still works — prevent_destroy only blocks the resource's direct deletion.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════ CICD ════ -->
+<section id="cicd">
+  <div class="container">
+    <div class="sec-label">Level 3 · CI/CD</div>
+    <h2 class="sec-title">CI/CD Integration — <span>The Assembly Line</span></h2>
+
+    <div class="story-box">
+      <p>A car factory doesn't let engineers drive cars off the line whenever they feel like it. There's QC, inspection, floor manager sign-off. <em>Plan on PR = inspection bay. Apply on merge = manager sign-off. State lock = one car leaves the line at a time.</em></p>
+    </div>
+
+    <div class="diagram">
+      <div class="diagram-title">◈ The Golden CI/CD Rule</div>
+      <div class="tf-flow" style="flex-wrap:wrap;gap:0">
+        <div class="tf-node" style="--accent-color:var(--neon2)">
+          <span class="tf-node-icon">🔀</span>
+          <div class="tf-node-name">PR OPENED</div>
+          <div class="tf-node-desc">push to branch</div>
+        </div>
+        <div class="tf-arrow"></div>
+        <div class="tf-node">
+          <span class="tf-node-icon">🔍</span>
+          <div class="tf-node-name">LINT + SCAN</div>
+          <div class="tf-node-desc">fmt, validate, tfsec</div>
+        </div>
+        <div class="tf-arrow"></div>
+        <div class="tf-node" style="border-color:var(--neon)">
+          <span class="tf-node-icon">📊</span>
+          <div class="tf-node-name">PLAN</div>
+          <div class="tf-node-desc">post to PR comment</div>
+        </div>
+        <div class="tf-arrow"></div>
+        <div class="tf-node">
+          <span class="tf-node-icon">✅</span>
+          <div class="tf-node-name">REVIEW</div>
+          <div class="tf-node-desc">team approves</div>
+        </div>
+        <div class="tf-arrow"></div>
+        <div class="tf-node" style="border-color:var(--neon4)">
+          <span class="tf-node-icon">🔀</span>
+          <div class="tf-node-name">MERGE → MAIN</div>
+          <div class="tf-node-desc">triggers apply</div>
+        </div>
+        <div class="tf-arrow"></div>
+        <div class="tf-node" style="border-color:var(--neon2)">
+          <span class="tf-node-icon">🚀</span>
+          <div class="tf-node-name">APPLY</div>
+          <div class="tf-node-desc">main only + lock</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-group">
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('cicd','gha')">GitHub Actions</button>
+        <button class="tab-btn" onclick="switchTab('cicd','jenkins')">Jenkins</button>
+        <button class="tab-btn" onclick="switchTab('cicd','wif')">WIF Auth (GCP)</button>
+      </div>
+      <div class="tab-pane active" id="cicd-gha">
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">.github/workflows/terraform.yml</div></div>
+          <div class="code-body"><span class="key">name</span>: <span class="str">Terraform</span>
+<span class="key">on</span>:
+  <span class="key">pull_request</span>: { <span class="key">branches</span>: [<span class="str">main</span>], <span class="key">paths</span>: [<span class="str">"infra/**"</span>] }
+  <span class="key">push</span>:          { <span class="key">branches</span>: [<span class="str">main</span>],  <span class="key">paths</span>: [<span class="str">"infra/**"</span>] }
+
+<span class="key">permissions</span>:
+  <span class="key">contents</span>:      <span class="str">read</span>
+  <span class="key">pull-requests</span>: <span class="str">write</span>   <span class="cmt"># post plan as PR comment</span>
+  <span class="key">id-token</span>:      <span class="str">write</span>   <span class="cmt"># Workload Identity Federation</span>
+
+<span class="key">jobs</span>:
+  <span class="key">terraform</span>:
+    <span class="key">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: <span class="str">actions/checkout@v4</span>
+      - <span class="key">name</span>: <span class="str">Auth GCP (keyless WIF)</span>
+        <span class="key">uses</span>: <span class="str">google-github-actions/auth@v2</span>
+        <span class="key">with</span>:
+          <span class="key">workload_identity_provider</span>: <span class="str">${{ secrets.WIF_PROVIDER }}</span>
+          <span class="key">service_account</span>:           <span class="str">${{ secrets.TF_SA_EMAIL }}</span>
+      - <span class="key">uses</span>: <span class="str">hashicorp/setup-terraform@v3</span>
+        <span class="key">with</span>: { <span class="key">terraform_version</span>: <span class="str">"1.7.0"</span>, <span class="key">terraform_wrapper</span>: <span class="fn">true</span> }
+      - <span class="key">run</span>: <span class="str">terraform init && terraform validate</span>
+      - <span class="key">run</span>: <span class="str">terraform plan -no-color -out=tfplan</span>
+        <span class="key">id</span>: <span class="str">plan</span>
+        <span class="key">env</span>:
+          <span class="key">TF_VAR_project_id</span>: <span class="str">${{ vars.GCP_PROJECT }}</span>
+      <span class="cmt"># Apply ONLY on push to main</span>
+      - <span class="key">run</span>: <span class="str">terraform apply -auto-approve tfplan</span>
+        <span class="key">if</span>: <span class="str">github.ref == 'refs/heads/main' && github.event_name == 'push'</span></div>
+        </div>
+      </div>
+      <div class="tab-pane" id="cicd-jenkins">
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">Jenkinsfile (Declarative)</div></div>
+          <div class="code-body"><span class="kw">pipeline</span> {
+  <span class="kw">agent</span> { <span class="kw">label</span> <span class="str">'terraform'</span> }
+  <span class="key">environment</span> {
+    GOOGLE_CREDENTIALS = <span class="fn">credentials</span>(<span class="str">'gcp-tf-sa-key'</span>)
+    TF_VAR_project_id  = <span class="str">'my-project-id'</span>
+  }
+  <span class="kw">stages</span> {
+    <span class="kw">stage</span>(<span class="str">'Init'</span>)     { <span class="kw">steps</span> { <span class="kw">sh</span> <span class="str">'terraform init -input=false'</span> } }
+    <span class="kw">stage</span>(<span class="str">'Validate'</span>) { <span class="kw">steps</span> { <span class="kw">sh</span> <span class="str">'terraform validate'</span> } }
+    <span class="kw">stage</span>(<span class="str">'Plan'</span>)     { <span class="kw">steps</span> { <span class="kw">sh</span> <span class="str">'terraform plan -out=tfplan'</span> } }
+    <span class="kw">stage</span>(<span class="str">'Approval'</span>) {
+      <span class="kw">when</span> { branch <span class="str">'main'</span> }
+      <span class="kw">steps</span> {
+        <span class="kw">input</span> message: <span class="str">'Review plan. Apply?'</span>,
+              submitter: <span class="str">'devops-leads'</span>
+      }
+    }
+    <span class="kw">stage</span>(<span class="str">'Apply'</span>) {
+      <span class="kw">when</span> { branch <span class="str">'main'</span> }
+      <span class="kw">steps</span> { <span class="kw">sh</span> <span class="str">'terraform apply -auto-approve tfplan'</span> }
+    }
+  }
+}</div>
+        </div>
+      </div>
+      <div class="tab-pane" id="cicd-wif">
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">Workload Identity Federation — No SA Key Files!</div></div>
+          <div class="code-body"><span class="cmt"># WIF = GitHub's OIDC token exchanged for short-lived GCP creds</span>
+<span class="cmt"># No JSON key files. No rotation. No leaks. Modern standard.</span>
+
+<span class="cmt"># Step 1: Create WIF pool + provider</span>
+gcloud iam workload-identity-pools create <span class="str">"github-pool"</span> \
+  --location=global
+gcloud iam workload-identity-pools providers create-oidc <span class="str">"github"</span> \
+  --workload-identity-pool=<span class="str">"github-pool"</span> \
+  --issuer-uri=<span class="str">"https://token.actions.githubusercontent.com"</span> \
+  --attribute-mapping=<span class="str">"google.subject=assertion.sub,attribute.repository=assertion.repository"</span>
+
+<span class="cmt"># Step 2: Bind SA to WIF</span>
+gcloud iam service-accounts add-iam-policy-binding \
+  <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="502435222231363f223d7d2331103d297d20223f3a7e39313d7e37233522263933353133333f253e247e333f3d">[email&#160;protected]</a> \
+  --role=<span class="str">"roles/iam.workloadIdentityUser"</span> \
+  --member=<span class="str">"principalSet://iam.googleapis.com/.../attribute.repository/org/repo"</span>
+
+<span class="cmt"># Plan SA: only refs/heads/* (any branch)</span>
+<span class="cmt"># Apply SA: only refs/heads/main (main branch ONLY!)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn-box">NEVER run terraform apply on a pull_request event. Only on push to main. Apply on PR = infra changes before code review. The car rolls off the line before the inspector signs it.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════ SECURITY ════ -->
+<section id="security">
+  <div class="container">
+    <div class="sec-label">Level 3 · Security</div>
+    <h2 class="sec-title">Security — <span>Three Castle Walls</span></h2>
+
+    <div class="analogy-box">
+      <div class="analogy-compare">
+        <div class="analogy-side">
+          <span class="analogy-emoji">🏰</span>
+          <span class="analogy-label">Medieval Castle</span>
+          <span class="analogy-desc">Outer wall → inner wall → vault. Each wall stops a different attacker.</span>
+        </div>
+        <div class="analogy-eq">=</div>
+        <div class="analogy-side">
+          <span class="analogy-emoji">🔐</span>
+          <span class="analogy-label">Terraform Security</span>
+          <span class="analogy-desc">Code scanning → IAM → state encryption. Each layer stops different threats.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div class="concept-card" style="--accent-color:var(--neon2)" onclick="earnXP(20,'Security concept learned!')">
+        <span class="cc-icon">🔍</span>
+        <div class="cc-name">SAST: tfsec + checkov</div>
+        <div class="cc-analogy">"Spell-check for security"</div>
+        <div class="cc-desc">Scan .tf files on every PR. Catch open firewalls, public buckets, missing encryption BEFORE deploy. Block PR on HIGH severity findings.</div>
+        <span class="cc-badge badge-b">WALL 1: CODE</span>
+      </div>
+      <div class="concept-card" style="--accent-color:var(--neon4)" onclick="earnXP(20,'Security concept learned!')">
+        <span class="cc-icon">🔑</span>
+        <div class="cc-name">Secrets: Never in .tf</div>
+        <div class="cc-analogy">"Don't write passwords on the blueprint"</div>
+        <div class="cc-desc">Use Secret Manager refs. Terraform manages the secret RESOURCE not the VALUE. sensitive=true hides from terminal, NOT from state.</div>
+        <span class="cc-badge badge-i">WALL 1: CODE</span>
+      </div>
+      <div class="concept-card" style="--accent-color:var(--neon3)" onclick="earnXP(20,'Security concept learned!')">
+        <span class="cc-icon">🏦</span>
+        <div class="cc-name">State Encryption (CMEK)</div>
+        <div class="cc-analogy">"Lock the vault with your own key"</div>
+        <div class="cc-desc">GCS bucket + Cloud KMS CMEK + object versioning. iam_binding (authoritative) on bucket. Enable Data Access audit logs.</div>
+        <span class="cc-badge badge-a">WALL 2: STATE</span>
+      </div>
+      <div class="concept-card" style="--accent-color:var(--neon5)" onclick="earnXP(20,'Security concept learned!')">
+        <span class="cc-icon">👤</span>
+        <div class="cc-name">Least Privilege SA</div>
+        <div class="cc-analogy">"Give the locksmith only the keys he needs"</div>
+        <div class="cc-desc">NEVER roles/owner or roles/editor. Enumerate specific roles: compute.admin, container.admin. Plan SA = viewer only. Apply SA = specific admins.</div>
+        <span class="cc-badge badge-a">WALL 3: IAM</span>
+      </div>
+      <div class="concept-card" style="--accent-color:var(--neon)" onclick="earnXP(20,'Security concept learned!')">
+        <span class="cc-icon">🎫</span>
+        <div class="cc-name">WIF — No Key Files</div>
+        <div class="cc-analogy">"Use your badge, not a spare key"</div>
+        <div class="cc-desc">Workload Identity Federation replaces SA JSON keys. GitHub OIDC token → short-lived GCP credential. No rotation. No leaks. 2025 standard.</div>
+        <span class="cc-badge badge-a">WALL 3: IAM</span>
+      </div>
+      <div class="concept-card" style="--accent-color:var(--neon6)" onclick="earnXP(20,'Security concept learned!')">
+        <span class="cc-icon">📜</span>
+        <div class="cc-name">OPA / Conftest</div>
+        <div class="cc-analogy">"Policy officer reviews the plan before execution"</div>
+        <div class="cc-desc">Policy as code on the plan JSON. Catches logic flaws SAST misses (variable that conditionally makes bucket public). Runs in CI after plan.</div>
+        <span class="cc-badge badge-e">ADVANCED</span>
+      </div>
+    </div>
+
+    <div class="code-lab">
+      <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">Insecure vs Secure Patterns</div></div>
+      <div class="code-body"><span class="cmt"># ❌ INSECURE: open firewall</span>
+<span class="kw">resource</span> <span class="val">"google_compute_firewall"</span> <span class="val">"bad"</span> {
+  allow { protocol=<span class="str">"all"</span> }; source_ranges=[<span class="str">"0.0.0.0/0"</span>]
+}
+<span class="cmt"># ✅ SECURE: restrict to VPN range, target tagged instances only</span>
+<span class="kw">resource</span> <span class="val">"google_compute_firewall"</span> <span class="val">"good"</span> {
+  allow { protocol=<span class="str">"tcp"</span>; ports=[<span class="str">"22"</span>] }
+  source_ranges=[<span class="str">"10.200.0.0/16"</span>]; target_tags=[<span class="str">"bastion"</span>]
+}
+
+<span class="cmt"># ❌ INSECURE: public GCS bucket</span>
+<span class="kw">resource</span> <span class="val">"google_storage_bucket"</span> <span class="val">"bad"</span> {
+  public_access_prevention = <span class="str">"inherited"</span>  <span class="cmt"># ← default, can be made public!</span>
+}
+<span class="cmt"># ✅ SECURE</span>
+<span class="kw">resource</span> <span class="val">"google_storage_bucket"</span> <span class="val">"good"</span> {
+  public_access_prevention    = <span class="str">"enforced"</span>
+  uniform_bucket_level_access = <span class="fn">true</span>
+  versioning { enabled = <span class="fn">true</span> }
+}
+
+<span class="cmt"># ❌ INSECURE: hardcoded secret</span>
+<span class="kw">resource</span> <span class="val">"google_sql_user"</span> <span class="val">"bad"</span> { password = <span class="str">"super-secret-123"</span> }
+<span class="cmt"># ✅ SECURE: read from Secret Manager at apply time</span>
+<span class="kw">data</span> <span class="val">"google_secret_manager_secret_version"</span> <span class="val">"pass"</span> {
+  secret = <span class="str">"projects/p/secrets/db-password"</span>
+}
+<span class="kw">resource</span> <span class="val">"google_sql_user"</span> <span class="val">"good"</span> {
+  password = data.google_secret_manager_secret_version.pass.secret_data
+}</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════ ADVANCED PATTERNS ════ -->
+<section id="advanced">
+  <div class="container">
+    <div class="sec-label">Level 4 · Expert</div>
+    <h2 class="sec-title">Advanced <span>Production Patterns</span></h2>
+
+    <div class="tab-group">
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('adv','workspaces')">Workspaces</button>
+        <button class="tab-btn" onclick="switchTab('adv','moved')">moved block</button>
+        <button class="tab-btn" onclick="switchTab('adv','remote')">remote_state</button>
+        <button class="tab-btn" onclick="switchTab('adv','target')">-target</button>
+        <button class="tab-btn" onclick="switchTab('adv','taint')">replace</button>
+        <button class="tab-btn" onclick="switchTab('adv','testing')">Testing</button>
+      </div>
+      <div class="tab-pane active" id="adv-workspaces">
+        <div class="analogy-box">
+          <div class="analogy-compare">
+            <div class="analogy-side"><span class="analogy-emoji">🌐</span><span class="analogy-label">Browser Profiles</span><span class="analogy-desc">Same browser. Different bookmarks, cookies, history per profile.</span></div>
+            <div class="analogy-eq">=</div>
+            <div class="analogy-side"><span class="analogy-emoji">🌿</span><span class="analogy-label">Workspaces</span><span class="analogy-desc">Same code. Different state per workspace.</span></div>
+          </div>
+        </div>
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">Workspaces</div></div>
+          <div class="code-body">terraform workspace new dev
+terraform workspace new staging
+terraform workspace new prod
+terraform workspace select prod
+
+<span class="cmt"># Use in code:</span>
+<span class="kw">locals</span> { env = terraform.workspace }  <span class="cmt"># "prod"</span>
+
+<span class="kw">resource</span> <span class="val">"google_compute_instance"</span> <span class="val">"app"</span> {
+  machine_type = <span class="str">{dev="e2-small",staging="e2-medium",prod="e2-standard-4"}[terraform.workspace]</span>
+}
+<span class="cmt"># GCS: prefix/env:/prod.tfstate, prefix/env:/staging.tfstate</span>
+<span class="cmt"># Each workspace has its own lock</span></div>
+        </div>
+        <div class="warn-box">Workspaces share code — a bug hits all environments. For true isolation at scale, use SEPARATE ROOT MODULES per environment (envs/prod/, envs/staging/) with separate GCS state prefixes.</div>
+      </div>
+      <div class="tab-pane" id="adv-moved">
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">moved block — Refactor without destroy</div></div>
+          <div class="code-body"><span class="cmt"># Rename a resource in state WITHOUT destroying and recreating it</span>
+<span class="kw">moved</span> {
+  <span class="key">from</span> = google_compute_instance.web_server
+  <span class="key">to</span>   = google_compute_instance.app_server
+}
+
+<span class="cmt"># Move resource into a module</span>
+<span class="kw">moved</span> {
+  <span class="key">from</span> = google_storage_bucket.logs
+  <span class="key">to</span>   = module.storage.google_storage_bucket.logs
+}
+
+<span class="cmt"># Terraform 1.1+ — replaces the old "terraform state mv" command</span>
+<span class="cmt"># The moved block is declarative and version-controllable</span></div>
+        </div>
+      </div>
+      <div class="tab-pane" id="adv-remote">
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">terraform_remote_state — Cross-stack outputs</div></div>
+          <div class="code-body"><span class="cmt"># Stack A exports: outputs.tf</span>
+<span class="kw">output</span> <span class="val">"network_id"</span> { value = google_compute_network.vpc.id }
+
+<span class="cmt"># Stack B reads Stack A's outputs</span>
+<span class="kw">data</span> <span class="val">"terraform_remote_state"</span> <span class="val">"vpc"</span> {
+  <span class="key">backend</span> = <span class="str">"gcs"</span>
+  <span class="key">config</span>  = {
+    <span class="key">bucket</span> = <span class="str">"my-org-tf-state"</span>
+    <span class="key">prefix</span> = <span class="str">"infra/vpc"</span>
+  }
+}
+<span class="cmt"># Use: data.terraform_remote_state.vpc.outputs.network_id</span>
+
+<span class="cmt"># When to use: when teams manage separate stacks and need to share</span>
+<span class="cmt"># Avoid tight coupling — prefer publishing to a central data store</span></div>
+        </div>
+      </div>
+      <div class="tab-pane" id="adv-target">
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">-target — Apply one resource</div></div>
+          <div class="code-body"><span class="cmt"># Apply only a specific resource</span>
+terraform plan -target=google_container_cluster.main
+terraform apply -target=google_container_cluster.main
+
+<span class="cmt"># Multiple targets</span>
+terraform apply \
+  -target=google_compute_network.vpc \
+  -target=google_compute_subnetwork.app
+
+<span class="cmt"># ⚠️ Use sparingly! -target can leave state inconsistent</span>
+<span class="cmt"># because it skips dependency checking</span>
+<span class="cmt"># Legitimate uses: debugging, bootstrapping chicken-and-egg problems</span>
+<span class="cmt"># Never use in CI/CD pipelines</span></div>
+        </div>
+      </div>
+      <div class="tab-pane" id="adv-taint">
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">-replace — Force recreate (replaces old taint)</div></div>
+          <div class="code-body"><span class="cmt"># Force a specific resource to be destroyed and recreated</span>
+terraform plan -replace=google_compute_instance.web_server
+terraform apply -replace=google_compute_instance.web_server
+
+<span class="cmt"># Old way (deprecated in 0.15+):</span>
+<span class="cmt"># terraform taint google_compute_instance.web_server</span>
+
+<span class="cmt"># When to use: VM is in a bad state, corrupt disk,</span>
+<span class="cmt"># need to reprovision with new config</span>
+<span class="cmt"># Pair with lifecycle.create_before_destroy for zero downtime</span></div>
+        </div>
+      </div>
+      <div class="tab-pane" id="adv-testing">
+        <div class="code-lab">
+          <div class="code-lab-header"><div class="code-dots"><div class="code-dot cd1"></div><div class="code-dot cd2"></div><div class="code-dot cd3"></div></div><div class="code-lab-title">Testing Terraform Code</div></div>
+          <div class="code-body"><span class="cmt"># ── 1. Built-in terraform test (Terraform 1.6+) ────────────</span>
+<span class="cmt"># tests/vpc.tftest.hcl</span>
+<span class="kw">run</span> <span class="val">"creates_vpc"</span> {
+  <span class="kw">command</span> = <span class="fn">plan</span>
+  <span class="kw">assert</span> {
+    <span class="key">condition</span>     = google_compute_network.vpc.auto_create_subnetworks == <span class="fn">false</span>
+    <span class="key">error_message</span> = <span class="str">"VPC must be in custom subnet mode"</span>
+  }
+}
+<span class="cmt"># terraform test  ← runs all .tftest.hcl files</span>
+
+<span class="cmt"># ── 2. checkov — policy as code ───────────────────────────</span>
+checkov -d ./infra --framework terraform
+checkov -d ./infra --framework secrets   <span class="cmt"># find hardcoded secrets</span>
+
+<span class="cmt"># ── 3. tfsec — GCP-specific rules ────────────────────────</span>
+tfsec ./infra --format lovely
+
+<span class="cmt"># ── 4. OPA conftest — plan-level policies ─────────────────</span>
+terraform show -json tfplan > tfplan.json
+conftest test tfplan.json --policy policy/</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════ QUIZ ZONE ════ -->
+<section id="quiz-zone">
+  <div class="container">
+    <div class="sec-label">Test Your Knowledge</div>
+    <h2 class="sec-title">Quiz <span>Arena</span> — Earn XP</h2>
+    <p class="sec-sub">Answer correctly to earn XP and build streaks. Each correct answer = +50 XP.</p>
+    <div class="quiz-game" id="quizArena">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════ GAMES ZONE ════ -->
+<section id="games">
+  <div class="container">
+    <div class="sec-label">Memory Games</div>
+    <h2 class="sec-title">Play to <span>Remember</span></h2>
+
+    <!-- FLASHCARDS -->
+    <h3 style="font-family:var(--display);font-size:0.8rem;letter-spacing:0.1em;color:var(--neon3);margin:2rem 0 0.5rem">FLASHCARD CHALLENGE — Hover to flip</h3>
+    <p style="font-size:0.82rem;color:var(--text2);margin-bottom:1rem">Active recall is the #1 most effective memory technique. Force yourself to answer before flipping.</p>
+    <div class="flashcard-arena" id="flashcardArena">
+      <!-- rendered by JS -->
+    </div>
+
+    <!-- DRAG AND DROP -->
+    <h3 style="font-family:var(--display);font-size:0.8rem;letter-spacing:0.1em;color:var(--neon5);margin:3rem 0 0.5rem">DRAG & DROP — Sort Commands by Stage</h3>
+    <div class="drag-game">
+      <div class="drag-title">◈ DRAG EACH COMMAND TO THE RIGHT CI/CD STAGE</div>
+      <div class="drag-board" id="dragBoard">
+        <div class="drag-pile">
+          <div class="drag-pile-title">COMMANDS (drag these)</div>
+          <div id="dragItems"></div>
+        </div>
+        <div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem">
+            <div>
+              <div class="drop-zone-label">PR STAGE (safe, read-only)</div>
+              <div class="drop-zone" id="dropPR" ondragover="dragOver(event)" ondrop="dropItem(event,'PR')"></div>
+            </div>
+            <div>
+              <div class="drop-zone-label">MAIN BRANCH ONLY (destructive)</div>
+              <div class="drop-zone" id="dropMain" ondragover="dragOver(event)" ondrop="dropItem(event,'Main')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="drag-check-btn" onclick="checkDrag()">CHECK ANSWERS</button>
+      <div class="drag-result" id="dragResult"></div>
+    </div>
+
+    <!-- MEMORY MATCH -->
+    <h3 style="font-family:var(--display);font-size:0.8rem;letter-spacing:0.1em;color:var(--neon4);margin:3rem 0 0.5rem">MEMORY MATCH — Find the Pairs</h3>
+    <p style="font-size:0.82rem;color:var(--text2);margin-bottom:1rem">Match each Terraform concept to its real-world analogy. Click two cards.</p>
+    <div class="match-game">
+      <div class="match-stats">
+        <div class="match-stat"><div class="match-stat-n" id="matchMoves">0</div><div class="match-stat-l">Moves</div></div>
+        <div class="match-stat"><div class="match-stat-n" id="matchPairs">0</div><div class="match-stat-l">Pairs Found</div></div>
+        <div class="match-stat"><div class="match-stat-n" id="matchScore">0</div><div class="match-stat-l">Score</div></div>
+      </div>
+      <div class="match-grid" id="matchGrid"></div>
+      <button onclick="initMatch()" style="margin-top:1rem;font-family:var(--display);font-size:0.65rem;letter-spacing:0.15em;padding:0.5rem 1.25rem;background:transparent;border:1px solid var(--neon5);color:var(--neon5);border-radius:4px;cursor:pointer">RESET GAME</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════ CHEAT SHEET ════ -->
+<section id="cheatsheet">
+  <div class="container">
+    <div class="sec-label">Quick Reference</div>
+    <h2 class="sec-title">The Complete <span>Cheat Sheet</span></h2>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-card-header">LIFECYCLE META-ARGUMENTS</div>
+        <div class="cheat-card-body">prevent_destroy       = true
+create_before_destroy = true
+ignore_changes        = [attr]
+replace_triggered_by  = [res]</div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-header">VARIABLE TYPES</div>
+        <div class="cheat-card-body">string · number · bool
+list(string) · set(string)
+map(string) · map(object({...}))
+object({ key = type })
+tuple([string, number])
+any</div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-header">USEFUL FUNCTIONS</div>
+        <div class="cheat-card-body">toset([...])     → set from list
+tomap({...})     → map
+flatten([...])   → flatten nested
+concat(a, b)     → merge lists
+merge(a, b)      → merge maps
+length(x)        → count items
+contains(l, v)   → bool
+coalesce(a,b,c)  → first non-null
+lookup(map,k,d)  → safe map get
+format("s%d",x)  → sprintf</div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-header">STATE COMMANDS</div>
+        <div class="cheat-card-body">terraform state list
+terraform state show ADDR
+terraform state mv OLD NEW
+terraform state rm ADDR
+terraform state pull
+terraform state push
+terraform import ADDR ID
+terraform force-unlock ID</div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-header">PLAN FLAGS</div>
+        <div class="cheat-card-body">-out=tfplan       save plan
+-target=ADDR      single resource
+-var="k=v"        set variable
+-var-file=f.tfvars
+-destroy          plan destroy
+-refresh-only     drift only
+-no-color         for CI logs
+-compact-warnings</div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-card-header">BACKEND: GCS</div>
+        <div class="cheat-card-body">backend "gcs" {
+  bucket         = "..."
+  prefix         = "..."
+  encryption_key = "..."
+}
+# Lock: .tflock (atomic PUT)
+# Migrate: init -migrate-state
+# Env: init -backend-config=f</div>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto;margin-top:2rem">
+      <table>
+        <thead>
+          <tr><th>Concept</th><th>Real-World Analogy</th><th>Memory Trick</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>.tf files</td><td>Architect's blueprint</td><td>You describe the end state, crew builds it</td></tr>
+          <tr><td>terraform init</td><td>mise en place (kitchen setup)</td><td>Like npm install — set up once</td></tr>
+          <tr><td>terraform plan</td><td>Chef's taste test</td><td>Read-only diff. ALWAYS run before apply</td></tr>
+          <tr><td>terraform apply</td><td>Construction crew builds</td><td>Only on merge to main in CI/CD</td></tr>
+          <tr><td>State file</td><td>Librarian's ledger / inventory sheet</td><td>Memory of last known reality</td></tr>
+          <tr><td>State locking</td><td>Library book checked out</td><td>GCS atomic PUT — one writer wins</td></tr>
+          <tr><td>Module</td><td>LEGO kit / function()</td><td>Variables in → outputs out. Sealed box.</td></tr>
+          <tr><td>count</td><td>Clone army (numbered)</td><td>Remove middle → index shift → danger</td></tr>
+          <tr><td>for_each</td><td>Named squad</td><td>Keys are stable — prefer over count</td></tr>
+          <tr><td>data source</td><td>Telescope (observe, don't create)</td><td>Read-only. prefix: data.TYPE.NAME.attr</td></tr>
+          <tr><td>locals</td><td>Post-it notes on your desk</td><td>Private computed values. DRY.</td></tr>
+          <tr><td>sensitive=true</td><td>Redacting meeting minutes</td><td>Hides in terminal. NOT in state file.</td></tr>
+          <tr><td>WIF auth</td><td>Badge access (not a spare key)</td><td>OIDC token → short-lived cred. No rotation.</td></tr>
+          <tr><td>workspace</td><td>Browser profiles</td><td>Same code, different state per profile</td></tr>
+          <tr><td>moved block</td><td>Rename file, keep contents</td><td>Refactor address without destroy</td></tr>
+          <tr><td>prevent_destroy</td><td>Safety lock on demolition switch</td><td>Use on DB, state buckets, prod clusters</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">TF QUEST</div>
+  <div class="footer-sub">TERRAFORM MASTERY · GAMIFIED LEARNING · ZERO → EXPERT</div>
+  <div style="font-family:var(--display);font-size:0.55rem;letter-spacing:0.1em;color:var(--dim);margin-top:0.5rem">BUILT FOR AMIR IRFAN · GCP DEVOPS ENGINEER</div>
+</footer>
+
+<!-- ══════════════════════════════════
+     JAVASCRIPT ENGINE
+══════════════════════════════════ -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ─── CURSOR ───
+const cursor=document.getElementById('cursor');
+const dot=document.getElementById('cursorDot');
+let mx=0,my=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  dot.style.left=mx-2+'px';dot.style.top=my-2+'px';
+  cursor.style.left=mx-8+'px';cursor.style.top=my-8+'px';
+});
+
+function setTheme(mode){
+  const root=document.documentElement;
+  const toggler=document.getElementById('themeToggle');
+  if(mode==='light'){
+    root.classList.add('light-mode');
+    if(toggler) toggler.textContent='🌙 Dark';
+  } else {
+    root.classList.remove('light-mode');
+    if(toggler) toggler.textContent='☀ Light';
+  }
+  localStorage.setItem('tfQuestTheme', mode);
+}
+
+function toggleTheme(){
+  const isLight=document.documentElement.classList.contains('light-mode');
+  setTheme(isLight?'dark':'light');
+}
+
+(function(){
+  const saved=localStorage.getItem('tfQuestTheme')||'dark';
+  setTheme(saved);
+})();
+
+// ─── SEARCH OVERLAY & KEYBOARD SHORTCUTS ───
+const searchItems=[
+  {title:'terraform init',desc:'Initialize your working directory.',category:'basics',anchor:'#basics'},
+  {title:'terraform plan',desc:'Preview changes before apply.',category:'basics',anchor:'#basics'},
+  {title:'terraform apply',desc:'Apply your desired state to cloud.',category:'basics',anchor:'#basics'},
+  {title:'terraform destroy',desc:'Destroy managed infrastructure.',category:'basics',anchor:'#basics'},
+  {title:'state file',desc:'Terraform state tracks real resources.',category:'state',anchor:'#state'},
+  {title:'remote backend',desc:'Store state in shared backend (GCS).',category:'state',anchor:'#state'},
+  {title:'for_each',desc:'Create resources by map/set keys.',category:'loops',anchor:'#loops'},
+  {title:'count',desc:'Create repeated resources by index.',category:'loops',anchor:'#loops'},
+  {title:'module',desc:'Reuse infrastructure components.',category:'modules',anchor:'#modules'},
+  {title:'workspace',desc:'Isolated states for environments.',category:'state',anchor:'#state'},
+  {title:'CI/CD',desc:'Pipeline with plan in PR/apply on main.',category:'cicd',anchor:'#cicd'},
+  {title:'security',desc:'Use least privilege, secrets scanning.',category:'security',anchor:'#security'},
+  {title:'quiz',desc:'Test your Terraform knowledge.',category:'games',anchor:'#quiz-zone'},
+  {title:'game',desc:'Play memory and drag-and-drop games.',category:'games',anchor:'#games'},
+];
+let searchCategory='all';
+let focusedSearchIndex=-1;
+
+function openSearch(){
+  const overlay=document.getElementById('searchOverlay');
+  const input=document.getElementById('searchInput');
+  if(overlay){
+    overlay.classList.add('open');
+    if(input){
+      input.value='';
+      focusedSearchIndex=-1;
+      setFilter('all',document.querySelector('.filter-chip[data-cat="all"]'));
+      setTimeout(()=>{input.focus();},30);
+    }
+  }
+}
+
+function closeSearch(){
+  const overlay=document.getElementById('searchOverlay');
+  if(overlay){
+    overlay.classList.remove('open');
+  }
+}
+
+function handleOverlayClick(e){
+  if(e.target.id==='searchOverlay'){
+    closeSearch();
+  }
+}
+
+function setFilter(category,btn){
+  searchCategory=category;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  handleSearch(document.getElementById('searchInput')?.value || '');
+}
+
+function clearSearch(){
+  const input=document.getElementById('searchInput');
+  if(input){
+    input.value='';
+    handleSearch('');
+    input.focus();
+  }
+}
+
+function handleSearch(query){
+  const term=(query||'').trim().toLowerCase();
+  let results;
+  if(!term){
+    results=searchItems;
+  } else {
+    results=searchItems.filter(item=>{
+      const match=(item.title+item.desc).toLowerCase();
+      return match.includes(term);
+    });
+  }
+  if(searchCategory!=='all'){
+    results=results.filter(item=>item.category===searchCategory);
+  }
+  focusedSearchIndex=-1;
+  showSearchResults(results);
+}
+
+function showSearchResults(results){
+  const el=document.getElementById('searchResults');
+  const count=document.getElementById('searchCount');
+  if(!el||!count) return;
+  count.textContent=`${results.length} result${results.length===1?'':'s'}`;
+  el.innerHTML = results.length ? results.map((item,index)=>`
+    <div class='result-item' data-index='${index}' onclick="location.hash='${item.anchor}';closeSearch();">
+      <div class='result-icon'>🔎</div>
+      <div class='result-body'>
+        <div class='result-title'>${item.title}</div>
+        <div class='result-desc'>${item.desc}</div>
+      </div>
+      <div class='result-meta'><div class='result-cat'>${item.category}</div></div>
+    </div>
+  `).join('') : '<div class="search-empty"><div class="search-empty-icon">😕</div>No results found. Try broader keywords.</div>';
+  updateSearchFocus();
+}
+
+function updateSearchFocus(){
+  const items=[...document.querySelectorAll('#searchResults .result-item')];
+  items.forEach((item,idx)=>item.classList.toggle('focused',idx===focusedSearchIndex));
+  if(focusedSearchIndex>=0 && focusedSearchIndex<items.length){
+    items[focusedSearchIndex].scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
+}
+
+function handleSearchKey(e){
+  if(e.key==='Escape'){
+    closeSearch();
+    return;
+  }
+  const items=[...document.querySelectorAll('#searchResults .result-item')];
+  if(e.key==='ArrowDown'){
+    e.preventDefault();
+    if(items.length===0) return;
+    focusedSearchIndex=(focusedSearchIndex+1)%items.length;
+    updateSearchFocus();
+    return;
+  }
+  if(e.key==='ArrowUp'){
+    e.preventDefault();
+    if(items.length===0) return;
+    focusedSearchIndex=(focusedSearchIndex-1+items.length)%items.length;
+    updateSearchFocus();
+    return;
+  }
+  if(e.key==='Enter'){
+    if(focusedSearchIndex>=0 && items[focusedSearchIndex]){
+      items[focusedSearchIndex].click();
+      return;
+    }
+    if(items[0]) items[0].click();
+  }
+}
+
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&(e.key.toLowerCase()==='k'||e.key==='/')){
+    e.preventDefault();
+    openSearch();
+    return;
+  }
+  if(e.key==='Escape'){
+    closeSearch();
+  }
+});
+
+// initialize search at load
+setTimeout(()=>{showSearchResults(searchItems);},20);
+
+// ─── XP SYSTEM ───
+let xp=0,streak=0,learnedCount=0;
+const MAX_XP=1000;
+const achievements=[
+  {xp:50,icon:'🔥',text:'FIRST BLOOD — 50 XP'},
+  {xp:100,icon:'⚡',text:'WARMING UP — 100 XP'},
+  {xp:250,icon:'💎',text:'EXPLORER — 250 XP'},
+  {xp:500,icon:'🏆',text:'HALF WAY THERE — 500 XP'},
+  {xp:750,icon:'🌟',text:'EXPERT MODE — 750 XP'},
+  {xp:1000,icon:'🧙',text:'TERRAFORM WIZARD — 1000 XP'},
+];
+let shownAch=new Set();
+function earnXP(amount,msg){
+  xp=Math.min(xp+amount,MAX_XP);
+  streak++;
+  updateHUD();
+  showXPPopup('+'+amount+' XP');
+  checkAchievements();
+}
+function updateHUD(){
+  document.getElementById('xpBar').style.width=(xp/MAX_XP*100)+'%';
+  document.getElementById('xpNum').textContent=xp+' / '+MAX_XP;
+  document.getElementById('streakNum').textContent=streak;
+  document.getElementById('learnedNum').textContent=learnedCount;
+}
+function showXPPopup(msg){
+  const p=document.getElementById('xpPopup');
+  p.textContent=msg;
+  p.classList.add('show');
+  setTimeout(()=>p.classList.remove('show'),1500);
+}
+function checkAchievements(){
+  achievements.forEach(a=>{
+    if(xp>=a.xp&&!shownAch.has(a.xp)){
+      shownAch.add(a.xp);
+      showAchievement(a.icon,a.text);
+    }
+  });
+}
+function showAchievement(icon,text){
+  const c=document.getElementById('achievements');
+  const el=document.createElement('div');
+  el.className='achievement';
+  el.innerHTML=`<span class="ach-icon">${icon}</span><span class="ach-text">${text}</span>`;
+  c.appendChild(el);
+  setTimeout(()=>el.classList.add('show'),50);
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3500);
+}
+
+// ─── START BUTTON ───
+function startJourney(){
+  earnXP(25,'Journey started!');
+  showAchievement('🚀','JOURNEY BEGUN — +25 XP');
+  document.getElementById('basics').scrollIntoView({behavior:'smooth'});
+}
+
+// ─── TOPIC TRACKER ───
+const topics=[
+  'terraform init','terraform plan','terraform apply','terraform destroy',
+  'terraform validate','terraform fmt','HCL resource block','data source',
+  'variable block','output block','locals','provider config',
+  'state file internals','remote backend (GCS)','state locking','terraform import',
+  'modules','module outputs','module sources','for_each','count',
+  'dynamic block','for expressions','flatten pattern','lifecycle',
+  'prevent_destroy','create_before_destroy','ignore_changes',
+  'workspaces','moved block','remote_state','CI/CD pipeline',
+  'GitHub Actions','Jenkins','Workload Identity Fed','tfsec/checkov',
+  'least privilege IAM','state encryption (CMEK)','sensitive outputs',
+  'OPA/conftest','-target flag','-replace flag','terraform test',
+  'depends_on','backend-config','tfvars','terraform graph','state mv',
+];
+const tracker=document.getElementById('topicTracker');
+topics.forEach(t=>{
+  const p=document.createElement('div');
+  p.className='topic-pill';
+  p.textContent=t;
+  p.onclick=()=>{
+    if(!p.classList.contains('learned')){
+      p.classList.add('learned');
+      learnedCount++;
+      earnXP(15,'Topic learned: '+t);
+      updateHUD();
+    }
+  };
+  tracker.appendChild(p);
+});
+
+// ─── NODE INFO ───
+const nodeInfo={
+  'tf-files':'📝 .tf FILES: HashiCorp Configuration Language (HCL). main.tf, variables.tf, outputs.tf, backend.tf, versions.tf. Your desired state — what you WANT the infra to look like.',
+  'tf-core':'⚙️ TERRAFORM CORE: The dependency graph engine. Reads .tf files, reads state, queries cloud APIs, computes the minimum diff, builds a DAG, executes in correct order.',
+  'tf-provider':'🔌 PROVIDERS: Plugins that translate HCL resource blocks into real API calls. hashicorp/google calls GCP APIs. hashicorp/aws calls AWS APIs. Version-pinned in terraform {} block.',
+  'tf-cloud':'☁️ REAL INFRA: The actual GCP/AWS/Azure resources created. VMs, VPCs, GKE clusters, IAM bindings, GCS buckets. These are the billable cloud resources.',
+  'tf-state':'💾 STATE FILE: JSON file tracking every resource Terraform manages. Stores cloud-returned attributes (IPs, IDs, ARNs). Enables incremental diffs. NEVER commit to git.',
+};
+function showNodeInfo(id){
+  const el=document.getElementById('node-info');
+  el.textContent=nodeInfo[id]||'';
+  el.style.display='block';
+  earnXP(5,'Explored diagram node');
+}
+
+// ─── TABS ───
+function switchTab(group,name){
+  document.querySelectorAll(`[id^="${group}-"]`).forEach(el=>{
+    el.classList.remove('active');
+  });
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(btn=>{
+    btn.classList.remove('active');
+  });
+  const pane=document.getElementById(`${group}-${name}`);
+  if(pane){pane.classList.add('active');earnXP(5,'Tab explored')}
+  // find and activate button
+  event.target.classList.add('active');
+}
+
+// ─── PIPELINE STAGES ───
+const stageDetails=[0,1,2,3,4,5];
+function showStage(i){
+  document.querySelectorAll('.pipeline-info').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('stageInfo'+i);
+  if(el){el.classList.add('active');earnXP(10,'Pipeline stage explored')}
+  document.querySelectorAll('.pipeline-stage').forEach((s,si)=>{
+    s.classList.toggle('active',si===i);
+  });
+}
+
+// ─── QUIZ ARENA ───
+const quizData=[
+  {q:'You run terraform apply and get "Error acquiring the state lock". What should you do?',
+   opts:['Run terraform init -reconfigure','Verify no other apply is running, then terraform force-unlock <LOCK_ID>','Delete the .tfstate file and rerun','Run terraform plan -refresh-only'],
+   correct:1,xp:50,
+   explain:'State locking prevents concurrent applies. When an apply crashes, the lock is stuck. Verify no active apply exists, then terraform force-unlock <LOCK_ID>. Never force-unlock while another apply truly runs.'},
+  {q:'What is the key danger of using count over for_each when removing a middle element?',
+   opts:['count is slower','Index shift causes Terraform to destroy/recreate resources that follow the removed index','count cannot be used with GCP resources','for_each requires more code'],
+   correct:1,xp:50,
+   explain:'count indexes by position [0,1,2]. Remove [1] and [2] becomes [1]. Terraform sees this as a change and may destroy+recreate it. for_each uses stable keys — removing "b" only destroys "b".'},
+  {q:'sensitive = true on a Terraform output does which of the following?',
+   opts:['Encrypts the value in the state file','Prevents the value being used by other resources','Hides value from CLI terminal output ONLY — still plain text in state','Deletes the value from state after apply'],
+   correct:2,xp:50,
+   explain:'sensitive=true ONLY hides from terminal/logs. The value is still stored as plain JSON in the state file. To protect it: encrypt the GCS bucket with CMEK and restrict IAM to the Terraform SA.'},
+  {q:'What is Workload Identity Federation and why is it better than SA keys?',
+   opts:['A way to create multiple GCP projects','Replaces SA JSON key files with short-lived OIDC tokens. No rotation, no leaks.','A Terraform provider for managing users','A type of GCS bucket policy'],
+   correct:1,xp:50,
+   explain:'WIF lets GitHub Actions (or any OIDC-compatible system) exchange a short-lived OIDC token for temporary GCP credentials. No JSON key file needed. No key rotation. If credentials leak they expire in minutes.'},
+  {q:'Which command shows what WOULD change without making any real cloud calls or changes?',
+   opts:['terraform apply -dry-run','terraform validate','terraform plan','terraform refresh'],
+   correct:2,xp:50,
+   explain:'terraform plan queries cloud APIs to refresh state, computes the diff, and shows +create / ~update / -destroy. It makes NO changes. Always run before apply. Save with -out=tfplan for reproducible applies.'},
+  {q:'Where should you NEVER place a backend {} block?',
+   opts:['In the root module backend.tf','Inside a child module (./modules/vpc/main.tf)','In versions.tf','In the terraform {} block in main.tf'],
+   correct:1,xp:50,
+   explain:'Backend blocks belong ONLY in the root module. Child modules must never contain backend blocks. Each root module has exactly one backend. Putting a backend inside a module causes errors and makes it non-reusable.'},
+  {q:'What does create_before_destroy in a lifecycle block achieve?',
+   opts:['Speeds up resource creation','Ensures a new resource is created BEFORE the old one is destroyed (zero-downtime replacement)','Prevents the resource from being destroyed','Creates a backup before destroying'],
+   correct:1,xp:50,
+   explain:'When Terraform must replace a resource (destroy + create), create_before_destroy flips the order: new resource is created first, validated, then old one is destroyed. Essential for zero-downtime database replacements.'},
+  {q:'What does the lineage field in terraform.tfstate represent?',
+   opts:['The Terraform version used','A UUID permanently identifying this state file lineage — prevents mixing unrelated states','The number of resources in state','The GCS bucket path'],
+   correct:1,xp:50,
+   explain:"lineage is a UUID generated when the state is first created. If it changes (e.g. you swap in a different state file), Terraform refuses to proceed — protecting you from accidentally merging two unrelated states."},
+  {q:'What does terraform import do?',
+   opts:['Downloads provider plugins','Copies state between backends','Brings an existing cloud resource under Terraform management by adding it to state','Imports variables from a .tfvars file'],
+   correct:2,xp:50,
+   explain:'terraform import <address> <cloud_id> adds an existing resource to the state file WITHOUT destroying and recreating it. After importing, you must also write the matching resource block in .tf files. Then run plan to verify no changes needed.'},
+  {q:'In GitHub Actions, when should terraform apply run?',
+   opts:['On every pull_request event','On push to main branch only (after PR merged and reviewed)','Every 10 minutes via schedule','Manually via workflow_dispatch only'],
+   correct:1,xp:50,
+   explain:'Golden rule: plan on PR, apply on merge to main. Apply on PR = infra changes before code review. The car leaves the factory before the inspector signs it. Apply must be gated by: (1) passing plan, (2) human review, (3) merge to main.'},
+];
+let currentQ=0,quizStreak=0;
+function renderQuiz(){
+  const arena=document.getElementById('quizArena');
+  if(currentQ>=quizData.length){
+    arena.innerHTML=`<div style="text-align:center;padding:2rem">
+      <div style="font-size:3rem;margin-bottom:1rem">🏆</div>
+      <div style="font-family:var(--display);font-size:1rem;color:var(--neon2);margin-bottom:0.5rem">QUIZ COMPLETE!</div>
+      <div style="color:var(--text2);font-size:0.85rem">You earned ${quizStreak*50} XP from this quiz</div>
+      <button onclick="currentQ=0;quizStreak=0;renderQuiz()" style="margin-top:1.5rem;font-family:var(--display);font-size:0.7rem;letter-spacing:0.15em;padding:0.6rem 1.5rem;background:transparent;border:1px solid var(--neon);color:var(--neon);border-radius:4px;cursor:pointer">PLAY AGAIN</button>
+    </div>`;
+    return;
+  }
+  const q=quizData[currentQ];
+  const pct=((currentQ)/quizData.length*100);
+  arena.innerHTML=`
+    <div class="quiz-progress">
+      <div class="quiz-prog-bar"><div class="quiz-prog-fill" style="width:${pct}%"></div></div>
+      <span class="quiz-streak">Q${currentQ+1}/${quizData.length} · Streak: ${quizStreak}🔥</span>
+    </div>
+    <div class="quiz-q-text">${q.q}</div>
+    <div class="quiz-opts">
+      ${q.opts.map((o,i)=>`
+        <button class="quiz-opt-btn" onclick="answerQuiz(${i})" id="qopt${i}">
+          <span class="opt-letter">${['A','B','C','D'][i]}</span>${o}
+        </button>
+      `).join('')}
+    </div>
+    <div class="quiz-explain" id="quizExplain">✅ ${q.explain}</div>
+    <button class="quiz-next" id="quizNext" onclick="nextQuestion()">NEXT QUESTION →</button>
+  `;
+}
+function answerQuiz(chosen){
+  const q=quizData[currentQ];
+  document.querySelectorAll('.quiz-opt-btn').forEach(b=>b.disabled=true);
+  document.getElementById('qopt'+chosen).classList.add(chosen===q.correct?'correct':'wrong');
+  if(chosen!==q.correct)document.getElementById('qopt'+q.correct).classList.add('correct');
+  document.getElementById('quizExplain').style.display='block';
+  document.getElementById('quizNext').style.display='inline-block';
+  if(chosen===q.correct){quizStreak++;earnXP(q.xp,'Correct answer! +'+q.xp+'XP')}
+  else{quizStreak=0;streak=0;updateHUD()}
+}
+function nextQuestion(){currentQ++;renderQuiz()}
+renderQuiz();
+
+// ─── FLASHCARDS ───
+const flashcards=[
+  {q:'What is the difference between resource and data block?',a:'resource CREATES infra (write). data READS existing infra (read-only). Analogy: resource = buying a house. data = looking at its Zillow listing.'},
+  {q:"Why is count[1] dangerous when you remove a middle item?",a:'count indexes by position. Remove index 1 and index 2 becomes 1. Terraform sees a "change" and may destroy + recreate index 1. for_each with stable keys avoids this entirely.'},
+  {q:'What does terraform plan -out=tfplan do?',a:'Saves the plan to a file. terraform apply tfplan then uses EXACTLY that plan — guaranteeing what was reviewed is what gets applied. Without -out, a new plan is computed at apply time.'},
+  {q:'Name 3 things stored in the state file',a:'1) Resource type + logical name, 2) All cloud-returned attributes (IDs, IPs, ARNs), 3) serial counter (increments per apply), 4) lineage UUID, 5) output values.'},
+  {q:'What does lifecycle.prevent_destroy = true do exactly?',a:'Terraform plan -destroy FAILS with an error if you try to destroy this resource. Protects DBs, state buckets, prod GKE clusters from accidental terraform destroy.'},
+  {q:'Variable priority order (highest to lowest)?',a:'"CLI Vars Teach Defaults" → (C) -var flag → (V) .tfvars file → (T) TF_VAR_* env var → (D) default value in variable block.'},
+  {q:'When is it safe to use terraform force-unlock?',a:'ONLY after verifying NO other apply process is currently running. The lock exists for a reason. Unlocking during an active apply corrupts state.'},
+  {q:'What is the lineage UUID in tfstate for?',a:"Permanently identifies this state file's lineage. If it changes, Terraform refuses to proceed — preventing accidental merging of two unrelated states (e.g. staging state used with prod code)."},
+  {q:'What does Workload Identity Federation replace?',a:'Service Account JSON key files. WIF = GitHub OIDC token exchanged for short-lived GCP credentials. No rotation, no leaks, no key management. 2025 security standard.'},
+  {q:'moved {} block vs terraform state mv?',a:'Both rename a resource in state without destroying it. moved {} is declarative (version-controlled in .tf files, applied automatically). terraform state mv is imperative (manual CLI command). Prefer moved {}.'},
+  {q:'What is the create_before_destroy lifecycle for?',a:'When Terraform must replace a resource, normally: destroy then create. create_before_destroy reverses this: create new FIRST, then destroy old. Essential for zero-downtime DB and instance replacements.'},
+  {q:"What's the difference between iam_member and iam_binding?",a:'iam_member = ADDITIVE (adds one member, leaves others untouched). iam_binding = AUTHORITATIVE (declares complete member list, removes anyone not listed). Use binding on state bucket to prevent IAM drift.'},
+];
+const fcArena=document.getElementById('flashcardArena');
+flashcards.forEach((fc,i)=>{
+  const el=document.createElement('div');
+  el.className='flashcard';
+  el.innerHTML=`<div class="flashcard-inner">
+    <div class="card-front">
+      <div class="card-front-q">${fc.q}</div>
+      <div class="card-front-hint">HOVER TO REVEAL</div>
+    </div>
+    <div class="card-back">
+      <div class="card-back-a">${fc.a}</div>
+    </div>
+  </div>`;
+  el.addEventListener('mouseenter',()=>earnXP(3,'Flashcard recalled'));
+  fcArena.appendChild(el);
+});
+
+// ─── DRAG & DROP ───
+const dragCommands=[
+  {text:'terraform fmt -check',stage:'PR'},
+  {text:'terraform validate',stage:'PR'},
+  {text:'terraform plan',stage:'PR'},
+  {text:'tfsec scan',stage:'PR'},
+  {text:'terraform apply',stage:'Main'},
+  {text:'terraform destroy',stage:'Main'},
+  {text:'force-unlock',stage:'Main'},
+];
+let draggedItem=null;
+const dropAssignments={};
+function initDrag(){
+  const pile=document.getElementById('dragItems');
+  pile.innerHTML='';
+  dragCommands.forEach(cmd=>{
+    const el=document.createElement('div');
+    el.className='drag-item';
+    el.textContent=cmd.text;
+    el.draggable=true;
+    el.dataset.cmd=cmd.text;
+    el.dataset.correct=cmd.stage;
+    el.addEventListener('dragstart',e=>{
+      draggedItem=el;
+      el.classList.add('dragging');
+    });
+    el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+    pile.appendChild(el);
+  });
+}
+function dragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over')}
+function dropItem(e,zone){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if(draggedItem){
+    e.currentTarget.appendChild(draggedItem);
+    dropAssignments[draggedItem.dataset.cmd]=zone;
+    draggedItem=null;
+  }
+}
+document.querySelectorAll('.drop-zone').forEach(z=>{
+  z.addEventListener('dragleave',()=>z.classList.remove('drag-over'));
+});
+function checkDrag(){
+  let correct=0;
+  dragCommands.forEach(cmd=>{
+    if(dropAssignments[cmd.text]===cmd.stage)correct++;
+  });
+  const res=document.getElementById('dragResult');
+  res.style.display='block';
+  if(correct===dragCommands.length){
+    res.textContent='🎉 PERFECT! All commands correctly sorted!';
+    res.className='drag-result correct';
+    earnXP(100,'Perfect drag & drop!');
+  } else {
+    res.textContent=`${correct}/${dragCommands.length} correct. Check: fmt, validate, plan, tfsec → PR. apply, destroy, force-unlock → Main only.`;
+    res.className='drag-result wrong';
+  }
+}
+initDrag();
+
+// ─── MEMORY MATCH ───
+const matchPairs=[
+  {a:'terraform init',b:'npm install'},
+  {a:'state file',b:'inventory ledger'},
+  {a:'module',b:'LEGO kit'},
+  {a:'count',b:'clone army'},
+  {a:'for_each',b:'named squad'},
+  {a:'data source',b:'telescope'},
+  {a:'provider',b:'cloud translator'},
+  {a:'output',b:'return value'},
+];
+let revealedCards=[],matchedPairs=0,moves=0,matchScore=0;
+function initMatch(){
+  revealedCards=[];matchedPairs=0;moves=0;matchScore=0;
+  document.getElementById('matchMoves').textContent=0;
+  document.getElementById('matchPairs').textContent=0;
+  document.getElementById('matchScore').textContent=0;
+  const grid=document.getElementById('matchGrid');
+  grid.innerHTML='';
+  const all=[...matchPairs.map(p=>({id:p.a,display:p.a,pair:p.b})),
+             ...matchPairs.map(p=>({id:p.b,display:p.b,pair:p.a}))];
+  all.sort(()=>Math.random()-0.5);
+  all.forEach((item,i)=>{
+    const card=document.createElement('div');
+    card.className='match-card';
+    card.dataset.id=item.id;
+    card.dataset.pair=item.pair;
+    card.innerHTML=`<div class="match-card-back" style="font-size:1.2rem">?</div>
+      <div class="match-card-inner">${item.display}</div>`;
+    card.onclick=()=>revealMatch(card);
+    grid.appendChild(card);
+  });
+}
+function revealMatch(card){
+  if(card.classList.contains('matched')||card.classList.contains('revealed'))return;
+  if(revealedCards.length>=2)return;
+  card.classList.add('revealed');
+  revealedCards.push(card);
+  if(revealedCards.length===2){
+    moves++;
+    document.getElementById('matchMoves').textContent=moves;
+    const [a,b]=revealedCards;
+    if(a.dataset.id===b.dataset.pair||a.dataset.pair===b.dataset.id){
+      a.classList.add('matched');b.classList.add('matched');
+      a.classList.remove('revealed');b.classList.remove('revealed');
+      matchedPairs++;matchScore+=Math.max(10,50-moves*2);
+      document.getElementById('matchPairs').textContent=matchedPairs;
+      document.getElementById('matchScore').textContent=matchScore;
+      earnXP(25,'Match found!');
+      if(matchedPairs===matchPairs.length){
+        showAchievement('🏅','MATCH MASTER — Completed memory round');
+        earnXP(50,'Match game complete!');
+      }
+    } else {
+      setTimeout(()=>{
+        a.classList.remove('revealed');
+        b.classList.remove('revealed');
+        revealedCards=[];
+      }, 800);
+    }
+    revealedCards=[];
+  }
+}
+
+// Ensure required elements exist
+if(document.getElementById('matchGrid')) initMatch();
+
+</script>
+</body>
+</html>

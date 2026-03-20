@@ -1,0 +1,9 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^cd \"C:\\\\Users\\\\amir1\\\\Downloads\\\\Devops Holybook\" ; node proxy\\.js$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "netstat": true
+    }
+}
