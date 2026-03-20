@@ -23,7 +23,7 @@ const https = require('https');
 //   PASTE YOUR OPENROUTER KEY HERE
 //   Get it free at: https://openrouter.ai/keys
 // ══════════════════════════════════════════════════════════
-const OPENROUTER_KEY = process.env.OPENROUTER_KEY || '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';
+const OPENROUTER_KEY = process.env.OPENROUTER_KEY || 'PASTE_HERE_OPEN_ROUTER_KEY';
 // ══════════════════════════════════════════════════════════
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3132;
